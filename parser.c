@@ -192,8 +192,10 @@ Expr *parse_expr(const char **s, uint32_t max_preced, struct parser_state *state
 			{
 				if (peek_token(s, state).type == CLOSE_BRAC_TOK)
 					break;
+				Expr *next_expr = parse_expr(s, PARSER_MAX_PRECED, state);
 				push_to_vec(&left->u.o.right->u.v.v,
-						parse_expr(s, PARSER_MAX_PRECED, state));
+						next_expr);
+				--next_expr->num_refs;
 			} while (get_next_token(s, state).type == COMMA_TOK);
 
 			if (current_tok.type != CLOSE_BRAC_TOK)

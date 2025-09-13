@@ -146,6 +146,8 @@ TypedValue println_typedval_multiargs(struct evaluator_state *state, VecN *args)
 		TypedValue cur_val = eval_expr(state, args->ptr[i]);
 		println_typedval(state, &cur_val);
 	}
+	if (args->n == 0)
+		fputc('\n', stdout);
 
 	return VAL_NUM(NAN);
 }

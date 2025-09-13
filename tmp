@@ -1,1 +1,0 @@
-git commit -m "added variable assignment (recursive definitions don't and won't work because it makes no sense mathematically (and i don't wanna figure it out; it's midnight ok don't judge)) and fixed "
