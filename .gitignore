@@ -8,3 +8,8 @@ vgcore*
 
 obj/*
 build/*
+.zig-cache/
+zig-out/
+
+cvi/
+c-hashmap/

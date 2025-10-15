@@ -9,6 +9,8 @@ typedef struct ArenaBucket {
 	struct ArenaBucket *next;
 } ArenaBucket;
 
+// this could technically be done with just a pointer to the last bucket,
+// given it's circularly linked, but I think this is clearer.
 typedef struct Arena {
 	ArenaBucket *first;
 	ArenaBucket *current;
@@ -56,8 +58,10 @@ void free_arena_buckets(ArenaBucket *first)
 #define MAX(a,b) ((a<b) ? b : a)
 
 #define ARENA_REALLOC_FACTOR 2
-inline void *arena_alloc(Arena *arena, size_t size)
+inline void *arena_alloc(Arena *arena, size_t size, size_t align)
 {
+	if (align != 0)
+		arena->index += (align - (arena->index % align)); // round index so 'align' is fulfilled and zig doesn't flag it as UB
 	void *ret_ptr = &arena->current->base[arena->index];
 
 	if (arena->index + size > arena->bucket_init_size)

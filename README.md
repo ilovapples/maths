@@ -5,10 +5,19 @@ Not much, but there is a syntax guide [here](docs/README.md) if you want to read
 
 # building
 ```sh
-git submodule update --init
+git submodule update --init # first time
 make
 ```
 Then run `build/mml --help` to display the command-line options.
+## NEW!
+If you have `zig` installed, you can use `zig build` to build the library and executable. Here are the commands:
+```sh
+git submodule update --init # first time
+zig build
+```
+You can run `zig build -Doptimize=ReleaseFast` to get more optimization. `zig build` also allows
+easy cross-compilation; [this](https://zig.guide/build-system/cross-compilation/) page has some more information (should still be up to date-ish).
+This will automatically build the static library as well (every source file except `src/main.c` and `src/prompt.c`).
 
 # library documentation
 It's not much of a library, but it is built to be easily extendable (hopefully that's true).

@@ -272,7 +272,7 @@ static MML_expr *parse_expr(const char **s, uint32_t max_preced, struct parser_s
 
 			get_next_token(s, state);
 
-			left->o.right = arena_alloc(MML_global_arena, sizeof(MML_expr));
+			left->o.right = arena_alloc_T(MML_global_arena, 1, MML_expr);
 			left->o.right->type = Vector_type;
 			// temporary dvec because we don't know how many elements it'll have
 			MML_expr_dvec temp = DVEC_INIT;

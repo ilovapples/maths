@@ -16,9 +16,9 @@ typedef struct Arena Arena;
 Arena *arena_make(size_t bucket_init_size);
 void arena_destroy(Arena *arena);
 
-void *arena_alloc(Arena *arena, size_t size);
+void *arena_alloc(Arena *arena, size_t size, size_t align);
 
-#define arena_alloc_T(_a, _n, _T) ((_T *)arena_alloc((_a), (_n)*sizeof(_T)))
+#define arena_alloc_T(_a, _n, _T) ((_T *)arena_alloc((_a), (_n)*sizeof(_T), _Alignof(_T)))
 
 MML__CPP_COMPAT_END_DECLS
 
