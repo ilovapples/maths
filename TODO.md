@@ -19,3 +19,4 @@
 - [ ] add Type type so I can add a `cast{type, val}` function <br />
 - [ ] fix prompt so it reads data in 1 byte minimum chunks (now it's 8 bytes for one character read,
       so stdin doesn't work unless you're currently the one using the prompt via shell input or something) <br />
+- [ ] add check for recursive variable definition (currently segfaults from stack overflow)
