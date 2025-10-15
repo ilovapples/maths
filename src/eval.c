@@ -110,11 +110,8 @@ int32_t MML_eval_set_variable(MML_state *restrict state,
 	if (state->variables == nullptr)
 		state->variables = hashmap_create();
 	
-	char *key_copy = arena_alloc_T(MML_global_arena, name.len, char);
-	memcpy(key_copy, name.s, name.len);
-
 	return hashmap_set(state->variables,
-			key_copy, name.len, (uintptr_t)expr);
+			name.s, name.len, (uintptr_t)expr);
 }
 MML_expr *MML_eval_get_variable(MML_state *restrict state,
 		strbuf name)
