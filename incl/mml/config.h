@@ -41,8 +41,6 @@ struct MML_config {
 };
 extern struct MML_config MML_global_config;
 
-void MML_term_set_raw_mode(void);
-void MML_term_restore(void);
 void MML_print_usage(void);
 void MML_arg_parse(int32_t argc, char **argv);
 
