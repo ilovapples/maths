@@ -1,5 +1,6 @@
 #include "mml/prompt.h"
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,7 +17,8 @@
 #include "cvi/dvec/dvec.h"
 
 #define NSEC_IN_SEC 1000000000ULL
-#define PROMPT_STR "\033[1;34mMML\033[0m \033[1;33m»\033[0m "
+#define PROMPT_STR "\033[1;33m>>\033[0m "
+#define PROMPT_STR_LEN 3
 #define LINE_MAX_LEN 4096
 
 #define time_blck(elapsed_p, ...) { \
@@ -27,7 +29,7 @@
 
 static struct termios orig_termios;
 
-static void term_restore(void) {
+void term_restore(void) {
 	tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
 	printf("\x1b[0 q");
 	printf("\x1b[?25h");
@@ -39,34 +41,34 @@ static void term_raw_mode(void) {
 	tcgetattr(STDIN_FILENO, &orig_termios);
 	atexit(term_restore);
 	raw = orig_termios;
-	raw.c_lflag &= ~(ECHO | ICANON | ISIG);
+	raw.c_lflag &= ~(ECHO | ICANON);
 	tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
 }
 
-static inline void insert_char(char* buf, size_t len, size_t *cursor, size_t *end, char c) {
+static inline void insert_char(char *buf, size_t len, size_t *cursor, size_t *end, char c) {
 	if (*end >= len - 1) return;
 	memmove(buf + *cursor + 1, buf + *cursor, *end - *cursor);
 	buf[(*cursor)++] = c;
 	(*end)++;
 }
 
-static inline void delete_char(char* buf, size_t *cursor, size_t *end) {
+static inline void delete_char(char *buf, size_t *cursor, size_t *end) {
 	if (*cursor == 0) return;
 	memmove(buf + *cursor - 1, buf + *cursor, *end - *cursor);
 	(*cursor)--;
 	(*end)--;
 }
 
-static void redraw_line(const char* buf, size_t cursor) {
+static void redraw_line(const char *buf, size_t cursor) {
     printf("\x1b[?25l");
     printf("\r\x1b[2K");
     printf("%s%s", PROMPT_STR, buf);
-    printf("\r\x1b[%zuC", 6 + cursor);
+    printf("\r\x1b[%zuC", PROMPT_STR_LEN + cursor);
     printf("\x1b[?25h");
     fflush(stdout);
 }
 
-static bool handle_escape_seq(const char* seq, size_t *cursor, size_t end) {
+static bool handle_escape_seq(const char *seq, size_t *cursor, size_t end) {
 	if (strcmp(seq, "\x1b[D") == 0) {
 		if (*cursor > 0) (*cursor)--;
 		return true;
@@ -80,7 +82,7 @@ static bool handle_escape_seq(const char* seq, size_t *cursor, size_t end) {
 	return false;
 }
 
-ssize_t get_prompt_line(char* out, size_t len) {
+ssize_t get_prompt_line(char *out, size_t len) {
 	size_t cursor = 0;
 	size_t end = 0;
 	out[0] = '\0';
@@ -106,7 +108,7 @@ ssize_t get_prompt_line(char* out, size_t len) {
 				continue;
 			}
 
-			if (seq_len >= (int)sizeof(seq) - 1) seq_len = 0;
+			if (seq_len >= (int)sizeof(seq) - 1) seq_len = 1;
 			continue;
 		}
 
@@ -117,7 +119,7 @@ ssize_t get_prompt_line(char* out, size_t len) {
 			return -1;
 		} else if (c == 0x7f || c == 0x08) {
 			delete_char(out, &cursor, &end);
-		} else {
+		} else if (isprint(c)) {
 			insert_char(out, len, &cursor, &end, c);
 		}
 
@@ -129,22 +131,20 @@ ssize_t get_prompt_line(char* out, size_t len) {
 	return (ssize_t)end;
 }
 
-void MML_run_prompt(MML_state* state) {
+void MML_run_prompt(MML_state *state) {
 	term_raw_mode();
 
 	char line_in[LINE_MAX_LEN + 1] = {0};
 	MML_value cur_val = VAL_INVAL;
 
-	printf("\033[1;36m╔════════════════════════════╗\033[0m\n");
-	printf("\033[1;36m║  MML Interactive REPL v1.0 ║\033[0m\n");
-	printf("\033[1;36m╚════════════════════════════╝\033[0m\n");
-	printf("Type \033[1;33mexit\033[0m or press \033[1;33mCtrl+D\033[0m to quit.\n\n");
+	printf("-- MML Interactive REPL v0.0.2 --\n");
+	printf("Type \033[1mexit\033[0m or press \033[1mCtrl+D\033[0m to quit.\n\n");
 	fflush(stdout);
 
 	ssize_t n_read = 0;
 
 	while (!(cur_val.type == Invalid_type && cur_val.i == MML_QUIT_INVAL)) {
-		memset(line_in, 0, sizeof(line_in));
+		memset(line_in, 0, sizeof(n_read));
 		n_read = get_prompt_line(line_in, LINE_MAX_LEN);
 
 		if (n_read == -1) break;
@@ -160,7 +160,7 @@ void MML_run_prompt(MML_state* state) {
 			MML_log_dbg("parsed in %.6fs\n", (double)nsecs / NSEC_IN_SEC);
 		}
 
-		MML_expr** cur;
+		MML_expr **cur;
 
 		if (!FLAG_IS_SET(DBG_TIME)) {
 			dv_foreach(exprs, cur)

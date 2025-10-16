@@ -16,7 +16,7 @@ extern strbuf expression;
 void sig_handler(int32_t signum)
 {
 	MML_cleanup_state(MML_global_config.eval_state);
-	MML_term_restore();
+	term_restore();
 	fprintf(stderr, "\n\nterminated with signal %d\n", signum);
 	exit(2);
 }

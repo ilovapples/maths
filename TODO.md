@@ -17,6 +17,7 @@
 - [ ] 'Nothing' type to return from stuff like `println` (basically `void`) <br />
 - [ ] improve `MML_print_expr` to print the AST in a more similar format to the syntax used with `tests/ast_test.h` <br />
 - [ ] add Type type so I can add a `cast{type, val}` function <br />
-- [ ] fix prompt so it reads data in 1 byte minimum chunks (now it's 8 bytes for one character read,
-      so stdin doesn't work unless you're currently the one using the prompt via shell input or something) <br />
+- [x] fix prompt so it reads data in 1 byte minimum chunks (now it's 8 bytes for one character read,
+      so stdin doesn't work unless you're currently the one using the prompt via shell input or something) (thanks @35rod) <br />
+- [ ] fix Ctrl+D not quitting prompt if the cursor isn't on the first character <br />
 - [ ] add check for recursive variable definition (currently segfaults from stack overflow)
