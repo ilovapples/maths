@@ -1,4 +1,5 @@
 it's a thing I guess
+Also, this program has been tested on x86_64-linux and aarch64-macos. The prompt (REPL) definitely won't work on Windows, and the rest of the program hasn't been tested (and I can't be bothered to check for anything POSIX-specific).
 
 # documentation
 Not much, but there is a syntax guide [here](docs/README.md) if you want to read it.
