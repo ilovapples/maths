@@ -30,6 +30,7 @@ typedef enum {
 	MML_OP_NOT_TOK, // this is boolean not
 	MML_OP_NEGATE,
 	MML_OP_UNARY_NOTHING,
+	MML_TILDE_TOK,
 	MML_NOT_OP_TOK,
 
 	// non-operator tokens
@@ -63,7 +64,6 @@ typedef enum {
 	MML_DOLLAR_TOK,
 	MML_AMPER_TOK,
 	MML_PIPE_TOK,
-	MML_TILDE_TOK,
 
 	MML_INVALID_TOK,
 	MML_WHITESPACE_TOK,

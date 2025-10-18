@@ -31,6 +31,7 @@ const char *const TOK_STRINGS[] = {
 	"OP_NOT",
 	"OP_NEGATE",
 	"OP_UNARY_NOTHING",
+	"TILDE_TOK",
 	"NOT_OP",
 
 
@@ -64,7 +65,6 @@ const char *const TOK_STRINGS[] = {
 	"DOLLAR_TOK",
 	"AMPER_TOK",
 	"PIPE_TOK",
-	"TILDE_TOK",
 
 	"INVALID_TOK",
 	"WHITESPACE_TOK",

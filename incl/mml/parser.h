@@ -31,7 +31,7 @@ constexpr const uint8_t PRECEDENCE[] = {
 
 	14,
 
-	2, 2, 2,
+	2, 2, 2, 2,
 };
 constexpr const MML_token_type TOK_BY_CHAR[] = {
 	MML_EOF_TOK,		//'\x00'
