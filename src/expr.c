@@ -120,35 +120,36 @@ void MML_print_expr(struct MML_config *config, const MML_expr *expr, uint32_t in
 	}
 	switch (expr->type) {
 	case Operation_type:
-		printf("Operation(%s):\n", TOK_STRINGS[expr->o.op]);
-		MML_print_indent(indent+2);
+		printf("Operation(%s,\n", TOK_STRINGS[expr->o.op]);
 
-		printf("Left:\n");
 		MML_print_expr(config, expr->o.left, indent+4);
+		putchar(',');
 		if (expr->o.right)
 		{
-			fputc('\n', stdout);
-			MML_print_indent(indent+2);
-			printf("Right:\n");
+			putchar('\n');
 			MML_print_expr(config, expr->o.right, indent+4);
+			putchar(',');
 		}
+		putchar('\n');
+		MML_print_indent(indent);
+		putchar(')');
 		break;
 	case Integer_type:
 		printf("Integer(%" PRIi64 ")", expr->i);
 		break;
 	case RealNumber_type:
 		if (config->full_prec_floats)
-			printf("RealNumber(%.*f)", config->precision, expr->n);
+			printf("Real(%.*f)", config->precision, expr->n);
 		else
-			printf("RealNumber(%.*g)", config->precision, expr->n);
+			printf("Real(%.*g)", config->precision, expr->n);
 		break;
 	case ComplexNumber_type:
 		if (config->full_prec_floats)
-			printf("ComplexNumber(%.*g%+.*gi)",
+			printf("Complex(%.*g%+.*gi)",
 					config->precision, creal(expr->cn),
 					config->precision, cimag(expr->cn));
 		else
-			printf("ComplexNumber(%.*g%+.*gi)",
+			printf("Complex(%.*g%+.*gi)",
 					config->precision, creal(expr->cn),
 					config->precision, cimag(expr->cn));
 		break;
@@ -168,12 +169,14 @@ void MML_print_expr(struct MML_config *config, const MML_expr *expr, uint32_t in
 		printf("Identifier('%.*s')", (int)expr->s.len, expr->s.s);
 		break;
 	case Vector_type:
-		printf("Vector(n=%zu):\n", expr->v.n);
+		printf("Vector(n=%zu,\n", expr->v.n);
 		for (size_t i = 0; i < expr->v.n; ++i)
 		{
-			MML_print_expr(config, expr->v.ptr[i], indent+2);
-			if (i < expr->v.n - 1) fputc('\n', stdout);
+			MML_print_expr(config, expr->v.ptr[i], indent+4);
+			fputs(",\n", stdout);
 		}
+		MML_print_indent(indent);
+		putchar(')');
 		break;
 	default:
 		printf("Invalid()");
