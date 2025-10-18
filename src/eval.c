@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "old_std_compat.h"
 #include "mml/expr.h"
 #include "mml/config.h"
 #include "mml/token.h"

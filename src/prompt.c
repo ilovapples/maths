@@ -10,6 +10,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "old_std_compat.h"
+
 #include "mml/config.h"
 #include "mml/expr.h"
 #include "mml/eval.h"
@@ -68,67 +70,100 @@ static void redraw_line(const char *buf, size_t cursor) {
     fflush(stdout);
 }
 
-static bool handle_escape_seq(const char *seq, size_t *cursor, size_t end) {
-	if (strcmp(seq, "\x1b[D") == 0) {
+#define isABCD(c) ((c) >= 'A' && (c) <= 'D')
+#define UP_C "A"
+#define DOWN_C "B"
+#define RIGHT_C "C"
+#define LEFT_C "D"
+#define START_ANSI "\x1b["
+#define CTRL_ANSI "\x1b[1;5"
+#define ALT_ANSI "\x1b[1;3"
+static bool handle_escape_seq(const char *seq, size_t seq_len, size_t *cursor, char *out, size_t *line_len) {
+
+	if (seq_len == 3 && strncmp(seq, START_ANSI LEFT_C, seq_len) == 0) { // if LEFT
 		if (*cursor > 0) (*cursor)--;
-		return true;
-	} else if (strcmp(seq, "\x1b[C") == 0) {
-		if (*cursor < end) (*cursor)++;
-		return true;
-	} else if (strcmp(seq, "\x1b[A") == 0 || strcmp(seq, "\x1b[B") == 0) {
-		return true;
+	} else if (seq_len == 3 && strncmp(seq, START_ANSI RIGHT_C, seq_len) == 0) { // if RIGHT
+		if (*cursor < *line_len) (*cursor)++;
+	} else if ((seq_len == 3 && strncmp(seq, START_ANSI UP_C, seq_len) == 0) // if UP
+			|| (seq_len == 6 && strncmp(seq, ALT_ANSI LEFT_C, seq_len) == 0) // or ALT+LEFT
+			|| (seq_len == 6 && strncmp(seq, CTRL_ANSI LEFT_C, seq_len) == 0)) { // or CTRL+LEFT
+		*cursor = 0;
+	} else if ((seq_len == 3 && strncmp(seq, START_ANSI DOWN_C, seq_len) == 0) // if DOWN
+			|| (seq_len == 6 && strncmp(seq, ALT_ANSI RIGHT_C, seq_len) == 0) // or ALT+RIGHT
+			|| (seq_len == 6 && strncmp(seq, CTRL_ANSI RIGHT_C, seq_len) == 0)) { // or CTRL+RIGHT
+		*cursor = (line_len == 0) ? 0 : *line_len-1;
+	} else if ((seq_len == 4 && strncmp(seq, START_ANSI "3~", seq_len) == 0)) { // if DEL
+		char *const cursor_ptr = out + *cursor;
+		if (*line_len - *cursor > 0) { // if in the middle of the line
+			memmove(cursor_ptr, cursor_ptr+1, (*line_len)-- - *cursor);
+		} else if (*line_len > 0) { // if at end of the line
+			out[--*line_len] = '\0';
+			*cursor = *line_len;
+		}
+	} else {
+		return false;
 	}
 
-	return false;
+	return true;
 }
 
 ssize_t get_prompt_line(char *out, size_t len) {
 	size_t cursor = 0;
-	size_t end = 0;
-	out[0] = '\0';
+	size_t line_len = 0;
+	out[line_len] = '\0';
 
 	redraw_line(out, cursor);
 
 	char seq[8] = {0};
-	int seq_len = 0;
+	char *seq_last = seq;
 	unsigned char c;
 
-	while (1) {
+	while (line_len < len) {
 		if (read(STDIN_FILENO, &c, 1) <= 0)
 			return -1;
 		
-		if (seq_len > 0 || c == 0x1b) {
-			seq[seq_len++] = c;
-			seq[seq_len] = '\0';
+		// check if the input character is part of an escape sequence
+		const bool empty_esc_seq = seq_last == seq;
+		const bool second_char_is_correct = 
+			   (seq_last == seq+1 && c == '[')
+			|| (seq_last > seq+1 && seq[1] == '[');
+		const bool is_esc_seq_char = (empty_esc_seq && c == 0x1b) || second_char_is_correct;
+		if (is_esc_seq_char) {
+			*seq_last++ = c;
 
-			if ((seq_len == 3 && seq[0] == 0x1b && seq[1] == '[')) {
-				handle_escape_seq(seq, &cursor, end);
-				seq_len = 0;
+			const size_t seq_len = seq_last - seq;
+			const bool is_short_seq = (seq_len == 3 && isABCD(seq[2])); // arrow keys
+			const bool is_medium_seq = (seq_len == 4 && seq[2] == '3'); // delete
+			const bool is_long_seq = (seq_len == 6 && seq[2] == '1'); // (alt or ctrl) + arrow keys
+			if ((is_short_seq || is_medium_seq || is_long_seq)
+					&& seq[0] == 0x1b && seq[1] == '[') {
+				handle_escape_seq(seq, seq_len, &cursor, out, &line_len);
+				*(seq_last = seq) = '\0';
 				redraw_line(out, cursor);
 				continue;
 			}
 
-			if (seq_len >= (int)sizeof(seq) - 1) seq_len = 1;
+			if (seq_last >= seq + sizeof(seq) - 1) seq_last = seq+1;
 			continue;
 		}
 
 		if (c == '\n') {
 			putchar('\n');
 			break;
-		} else if (c == 0x04 && end == 0) {
+		} else if (c == 0x04) {
 			return -1;
 		} else if (c == 0x7f || c == 0x08) {
-			delete_char(out, &cursor, &end);
+			delete_char(out, &cursor, &line_len);
 		} else if (isprint(c)) {
-			insert_char(out, len, &cursor, &end, c);
+			insert_char(out, len, &cursor, &line_len, c);
 		}
 
-		out[end] = '\0';
+		out[line_len] = '\0';
 		redraw_line(out, cursor);
 	}
 
-	out[end] = '\0';
-	return (ssize_t)end;
+	out[line_len] = '\0';
+	return (ssize_t)line_len;
 }
 
 void MML_run_prompt(MML_state *state) {
@@ -137,7 +172,7 @@ void MML_run_prompt(MML_state *state) {
 	char line_in[LINE_MAX_LEN + 1] = {0};
 	MML_value cur_val = VAL_INVAL;
 
-	printf("-- MML Interactive REPL v0.0.2 --\n");
+	printf("-- MML Interactive REPL v0.0.3 --\n");
 	printf("Type \033[1mexit\033[0m or press \033[1mCtrl+D\033[0m to quit.\n\n");
 	fflush(stdout);
 

@@ -29,6 +29,7 @@ pub fn build(b: *std.Build) void {
     var c_compiler_flags = [_][]const u8{
         "-Wall",
         "-Wextra",
+        "-Wpedantic",
         "-Wno-date-time",
         "-std=c23",
         "-g",

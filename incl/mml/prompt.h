@@ -1,8 +1,10 @@
 #ifndef PROMPT_H
 #define PROMPT_H
 
-#include "eval.h"
+#include "old_std_compat.h"
 #include "cpp_compat.h"
+
+#include "eval.h"
 
 MML__CPP_COMPAT_BEGIN_DECLS
 

@@ -19,5 +19,6 @@
 - [ ] add Type type so I can add a `cast{type, val}` function <br />
 - [x] fix prompt so it reads data in 1 byte minimum chunks (now it's 8 bytes for one character read,
       so stdin doesn't work unless you're currently the one using the prompt via shell input or something) (thanks @35rod) <br />
-- [ ] fix Ctrl+D not quitting prompt if the cursor isn't on the first character <br />
-- [ ] add check for recursive variable definition (currently segfaults from stack overflow)
+- [x] fix Ctrl+D not quitting prompt if the cursor isn't on the first character <br />
+- [ ] add check for recursive variable definition (currently segfaults from stack overflow) <br />
+- [ ] fix '~' operator not being used properly in the parser (reads past the end of PRECEDENCE, errors if optimizing with Debug or ReleaseSafe on `zig build`, but not if optimizing without safety, like with `make` or ReleaseFast) <br />

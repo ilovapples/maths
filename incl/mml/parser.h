@@ -1,10 +1,11 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include "old_std_compat.h"
+#include "cpp_compat.h"
+
 #include "mml/token.h"
 #include "mml/expr.h"
-#include "mml/eval.h"
-#include "cpp_compat.h"
 
 MML__CPP_COMPAT_BEGIN_DECLS
 

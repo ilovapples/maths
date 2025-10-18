@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "old_std_compat.h"
 #include "cpp_compat.h"
 
 MML__CPP_COMPAT_BEGIN_DECLS

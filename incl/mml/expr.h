@@ -4,9 +4,11 @@
 #include <complex.h>
 #include <stdint.h>
 
+#include "old_std_compat.h"
+#include "cpp_compat.h"
+
 #include "mml/token.h"
 #include "cvi/dvec/dvec.h"
-#include "cpp_compat.h"
 
 MML__CPP_COMPAT_BEGIN_DECLS
 
@@ -92,12 +94,12 @@ constexpr MML_value VAL_INVAL = { Invalid_type, .i = MML_ERROR_INVAL };
 
 typedef struct MML_state MML_state;
 void MML_print_indent(uint32_t indent);
-MML_value MML_print_typedval(MML_state *crestrict state, const MML_value *val);
-MML_value MML_println_typedval(MML_state *crestrict state, const MML_value *val);
-MML_value MML_print_typedval_multiargs(MML_state *crestrict state, MML_expr_vec *args);
-MML_value MML_println_typedval_multiargs(MML_state *crestrict state, MML_expr_vec *args);
+MML_value MML_print_typedval(MML_state *restrict state, const MML_value *val);
+MML_value MML_println_typedval(MML_state *restrict state, const MML_value *val);
+MML_value MML_print_typedval_multiargs(MML_state *restrict state, MML_expr_vec *args);
+MML_value MML_println_typedval_multiargs(MML_state *restrict state, MML_expr_vec *args);
 void MML_print_exprh(const MML_expr *expr);
-MML_value MML_print_exprh_tv_func(MML_state *crestrict , MML_expr_vec *args);
+MML_value MML_print_exprh_tv_func(MML_state *restrict , MML_expr_vec *args);
 
 void MML_free_pp(void *p);
 

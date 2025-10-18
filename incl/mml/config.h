@@ -5,7 +5,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include "old_std_compat.h"
 #include "cpp_compat.h"
+
 #include "mml/token.h"
 
 MML__CPP_COMPAT_BEGIN_DECLS
