@@ -1,4 +1,4 @@
-# Syntax Guide for My Math Lang (MML)
+# Syntax Guide for [My Math Lang (MML)](https://github.com/ilovapples/maths)
 
 ### <span id="contents">Contents</span>:
 1. [Concepts](#concepts)
@@ -7,39 +7,55 @@
 4. [Built-ins](#built-ins)
 
 ## <span id="concepts">Concepts</span> [↩](#contents)
-MML is a 'programming' language that evaluates mathematical expressions. I put 'programming' in quotes because it doesn't behave like most programming languages. In most programming languages, assigning an expression to a variable evaluates the expression, and assigns the output of that expression to the variable.
-MML, more similar to mathematics than programming, instead literally assigns the expression to the variable. Rather than assigning the evaluated value of the expression to the variable and retrieving that value whenever the variable is used, MML simply reevaluates the expression associated with the variable each time it is used. This means that, while a warning may be displayed, it is not illegal to assign to a variable an expression containing an undefined value, given that the undefined value is defined before the variable is evaluated. A side effect of this is that recursive definitions are illegal. This means that something like `x = x + 1` is not allowed, as would be the case in mathematics (also because I can't be bothered to rework my entire program to allow it but that's irrelevant). Actually, I haven't added a check for this just yet, so it will probably cause a segmentation fault if you try this.
-A variable/expression is 'evaluated' when it is used anywhere other than a variable definition or in a vector literal (see [Advanced Syntax](#advanced-syntax) for more on vectors).
+MML is a sort of mathematical scripting language with support for several mathematic data types, including real and complex numbers, vectors, and Booleans, with more planned (?) for the future.
+
+There a sort of 'concept' (hence the heading) that needs to be cleared up. In MML, when an expression is assigned to a variable, like `x = 9 + 3`, it is _literally_ assigned to the variable. This is distinct from the behavior of most _programming_
+languages, which would in this situation evaluate the expression and assign the _value_ to the variable, not the expression itself. This decision was made 1. because I didn't have a great plan going into this project, and 2. because I think this 
+behavior better reflects what would observed in an algebraic system. This interesting design allows for things like the following to be allowed (using python highlighting because it's probably easier to read):
+```python
+C = (F - 32) * 5/9
+F = 80
+C === 26 + 2/3
+```
+Notice that `F` wasn't defined before the second line `F = 80`, and yet `C` was well defined by its definition regardless of being dependent on the value of `F`. This also means that, when `F` is changed and `C` is reevaluated, it will reflect
+the new value of `F`, almost as if `C` were a function `C{F}` (functions in this form are planned, but work has not begun just yet).
+
+A variable/expression is 'evaluated' when it is used anywhere other than a variable definition or in a vector literal (see [Advanced Syntax](#advanced-syntax) for more on vectors). The interactive prompt (accessed via `-I` or `--interactive` from
+the executable) automatically evaluates the last expression in each input line, but nothing is automatically evaluated if using the pure library (or the `--expr=` and `--no-eval` options combined, which specify an expression to parse but not
+evaluate).
+
+(Also, I'm not sure if this is the best place to put this, but you can always check the [TODO.md](../TODO.md) for anything that's planned, though the language might be more technical than would be easily understandable. If you're still not sure
+about something, check the [Issues page](https://github.com/ilovapples/maths/issues).)
 
 ## <span id="basic-syntax">Basic Syntax</span> [↩](#contents)
 MML uses the most of the usual syntax for mathematical expressions, as well as a few operators taken from popular programming languages.
 In this guide, the word 'expression' will be used to mean any valid operation or constant, where an operation may have as one of its operands another operation. The word `expr` in a specification (the leftmost part of an entry) will be used to represent any valid expression.
 All expressions (equality or otherwise) found here evaluate to the boolean value `true`, for density of the explanation.
 #### Some of the relevant operators:
-- `A == B`	= estimated (13 digits) equality operator	(ex. `3 == 3`)
-- `A != B`	= estimated (13 digits) inequality operator	(ex. `9 != 5`)
-- `A === B`	= exact equality operator					(ex. `3 === 3`)
-- `A !== B`	= exact inequality operator					(ex. `9 !== 5`)
-- `!A`		= unary Boolean NOT operator				(ex. `!false == true`)
-- `A < B`	= less than operator						(ex. `9 < 5 == false`)
-- `A <= B`	= less than or equal operator				(ex. `9 <= 9 == true`)
-- `A > B`	= greater than operator						(ex. `9 > 5 == true`)
-- `A >= B`	= greater than or equal operator			(ex. `9 >= 9 == true`)
-- `A + B`	= add operation								(ex. `9 + 5 == 14`)
-- `A - B`	= subtract operation						(ex. `9 - 5 == 4`)
-- `-A`		= unary negate operation					(ex. `-9 + 5 == -4`)
-- `+A`		= this does nothing but it's not invalid	(ex. `+9 + 5 == 14`)
-- `A * B`	= multiply operation						(ex. `9 * 5 == 45`)
-- `A / B`	= divide operation							(ex. `9 / 5 == 1.8`)
-- `A ^ B`	= power operator							(ex. `9 ^ 5 ^ 2 == 9^25`)
-- `A % B`	= modulo (remainder) operator				(ex. `9 % 5 == 4`)
-- `|A|`		= absolute value operator					(ex. `|5-9| == 4`)
-- `(expr)`	= parentheses are always evaluated first	(ex. `9*(2+3) == 45`)
+- `A == B`	= estimated (~13 digits accurate) equality operator		(ex. `3 == 3`)
+- `A != B`	= estimated (~13 digits accurate) inequality operator	(ex. `9 != 5`)
+- `A === B`	= exact equality operator								(ex. `3 === 3`)
+- `A !== B`	= exact inequality operator								(ex. `9 !== 5`)
+- `!A`		= unary Boolean NOT operator							(ex. `!false == true`)
+- `A < B`	= less than operator									(ex. `9 < 5 == false`)
+- `A <= B`	= less than or equal operator							(ex. `9 <= 9 == true`)
+- `A > B`	= greater than operator									(ex. `9 > 5 == true`)
+- `A >= B`	= greater than or equal operator						(ex. `9 >= 9 == true`)
+- `A + B`	= add operation											(ex. `9 + 5 == 14`)
+- `A - B`	= subtract operation									(ex. `9 - 5 == 4`)
+- `-A`		= unary negate operation								(ex. `-9 + 5 == -4`)
+- `+A`		= this does nothing but it's not invalid				(ex. `+9 + 5 == 14`)
+- `A * B`	= multiply operation									(ex. `9 * 5 == 45`)
+- `A / B`	= divide operation										(ex. `9 / 5 == 1.8`)
+- `A ^ B`	= exponentiation operator								(ex. `9 ^ 5 ^ 2 == 9^25`)
+- `A % B`	= modulo (remainder) operator							(ex. `9 % 5 == 4`)
+- `|A|`		= absolute value operator								(ex. `|5-9| == 4`)
+- `(expr)`	= parentheses are always evaluated first				(ex. `9*(2+3) == 45`)
 
 Because it would be a massive pain otherwise, you may specify multiple statements/expressions by separating them with a semicolon (`;`).
 
 ## <span id="advanced-syntax">Advanced Syntax</span> [↩](#contents)
-No, there's no scientific notation yet.
+No, there's no scientific notation yet (it's planned though).
 
 MML also supports the use of vectors of any length (it gets weird if the length is 0, though).
 A vector may be created via this syntax for a vector literal:
@@ -48,12 +64,12 @@ The values of a vector may be accessed through the `.` operator, in a zero-index
 There is also nothing stopping you from creating nested vectors, but they do not behave as a matrix would in mathematics.
 
 A variable can be defined via the `=` operator, like so: `x = 0` <br/>
-For more on the semantics of variable assignment, see [Concepts](#concepts).
+For more specifics on the semantics of variable assignment, see [Concepts](#concepts).
 
 MML allows you to implicitly multiply two distinct values in certain circumstances by placing them next to each other.
 Example: `5pi == 5*pi` <br />
 
-MML supports complex numbers as well. A complex number can be defined as: `z = 5 + 3i`, where `i` is a built-in constant (see [Built-ins](#built-ins) for other built-in constants) that is multiplied by the number `3` and added to `5`. This was not made possible via any special syntax---really, under the hood, MML just promotes a number to a complex number if it used in an expression with a complex number, so all the example really does is promote `3` to the complex number `3+0i`, multiply it by `i` to create `0+3i`, and add `5` to make `5+3i`, which is assigned to `z`.
+MML supports complex numbers as well. A complex number can be defined as: `z = 5 + 3i`, where `i` is a built-in constant (see [Built-ins](#built-ins) for other built-in constants) that is multiplied by the number `3` and added to `5`. This was not made possible via any special syntax---really, under the hood, MML just promotes a number to a complex number if it used in an expression with a complex number, so all the example really does is promote `3` to the complex number `3+0i`, multiply it by `i` to create `0+3i`, and add `5` to make `5+3i`, which is assigned to `z` (sort of).
 
 Additionally, built-in functions are provided, though user-defined functions are not yet implemented. Functions are called via this syntax:
 `function_name{argument1, argument2, ...}`. Most functions take just 1 argument, but some take 2 or more. For example: `cos{1.5pi} == 0` (due to rounding errors, this statement evaluates to `false` if the `===` exact equality operator is used: `cos{1.5pi} === 0`).
@@ -107,3 +123,4 @@ In the leftmost section of a function's entry in this list, `...` represents the
 - `config_set{ident, val}` = sets the value of the configuration option specified by `ident` to `val`. Valid types for `val` depend on the config option specified by `ident`. 
 - `max{...}` = returns the greatest of its arguments, where each of its arguments must be a real number or a Boolean value (the `max` function makes little sense on unordered values such as complex numbers).
 - `min{...}` = returns the least of its arguments, where each of its arguments must be a real number or a Boolean value (the `min` function makes little sense on unordered values such as complex numbers).
+- `sort{v}` = returns a sorted copy of its first argument `v`, a vector (has to be a vector literal, but not for a good reason; I just haven't gotten around to fixing it yet)
