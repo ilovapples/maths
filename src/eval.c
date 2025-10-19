@@ -454,12 +454,16 @@ MML_value MML_eval_expr_recurse(MML_state *restrict state, const MML_expr *expr)
 	MML_expr *left = expr->o.left;
 	MML_expr *right = expr->o.right;
 
-	if (expr->o.op == MML_OP_ASSERT_EQUAL && left != NULL && left->type == Identifier_type)
-	{
+	if (expr->o.op == MML_OP_ASSERT_EQUAL && left != NULL && left->type == Identifier_type) {
+		bool contains_ident_check(const MML_expr *, void *);
+		if (MML_expr_search_for(right, &left->s, contains_ident_check) != NULL) {
+			MML_log_err("recursive dependency found in definition of '%.*s'\n",
+					(int)left->s.len, left->s.s);
+			return VAL_INVAL;
+		}
 		MML_eval_set_variable(state, left->s, right);
 		return MML_eval_expr_recurse(state, right);
-	} else if (expr->o.op == MML_OP_FUNC_CALL_TOK)
-	{
+	} else if (expr->o.op == MML_OP_FUNC_CALL_TOK) {
 		if (left == NULL
 		 || right == NULL
 		 || left->type != Identifier_type)
@@ -477,6 +481,15 @@ MML_value MML_eval_expr_recurse(MML_state *restrict state, const MML_expr *expr)
 			(right != NULL) ? MML_eval_expr_recurse(state, right) : VAL_INVAL,
 			expr->o.op);
 }
+
+bool contains_ident_check(const MML_expr *e, void *context)
+{
+	const strbuf *const ident = context;
+	return e->type == Identifier_type
+		&& e->s.len == ident->len
+		&& memcmp(ident->s, e->s.s, ident->len) == 0;
+}
+
 inline MML_value MML_eval_expr(MML_state *restrict state, const MML_expr *expr)
 {
 	return state->last_val = MML_eval_expr_recurse(state, expr);

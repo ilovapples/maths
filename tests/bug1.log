@@ -1,0 +1,29 @@
+>> a=[4,3,2]
+────────────
+[4, 3, 2]
+────────────
+>> sort{a}
+thread 137716 panic: load of misaligned address 0x1560b8f9 for type 'MML_expr **' (aka 'struct MML_expr **'), which requires 8 byte alignment
+lib/math.c:159:2: 0x103afcb in custom_sort (/home/asher/Coding/c/maths/lib/math.c)
+ memcpy(
+ ^
+src/eval.c:135:11: 0x1025c8f in apply_func (/home/asher/Coding/c/maths/src/eval.c)
+  return ((*vec_args_func)(state, &right_vec.v));
+          ^
+src/eval.c:472:10: 0x1025927 in MML_eval_expr_recurse (/home/asher/Coding/c/maths/src/eval.c)
+  return apply_func(state, left->s, right_val_vec);
+         ^
+src/eval.c:482:27: 0x10243e5 in MML_eval_expr (/home/asher/Coding/c/maths/src/eval.c)
+ return state->last_val = MML_eval_expr_recurse(state, expr);
+                          ^
+src/prompt.c:203:16: 0x103f302 in MML_run_prompt (/home/asher/Coding/c/maths/src/prompt.c)
+     cur_val = MML_eval_expr(state, *cur);
+               ^
+src/main.c:41:3: 0x101a4fc in main (/home/asher/Coding/c/maths/src/main.c)
+  MML_run_prompt(MML_global_config.eval_state);
+  ^
+../sysdeps/nptl/libc_start_call_main.h:58:16: 0x7fd5f8227674 in __libc_start_call_main (../sysdeps/x86/libc-start.c)
+../csu/libc-start.c:360:3: 0x7fd5f8227728 in __libc_start_main_impl (../sysdeps/x86/libc-start.c)
+???:?:?: 0x101a314 in ??? (???)
+???:?:?: 0x0 in ??? (???)
+zsh: IOT instruction (core dumped)  zig-out/bin/mml
