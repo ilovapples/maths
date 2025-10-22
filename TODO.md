@@ -23,4 +23,4 @@
 - [?] add check for recursive variable definition (currently segfaults from stack overflow)
 - [x] fix '~' operator not being used properly in the parser (reads past the end of PRECEDENCE, errors if optimizing with Debug or ReleaseSafe on `zig build`, but not if optimizing without safety, like with `make` or ReleaseFast)
 - [ ] fix the bug shown in `tests/bug1.log` (probably only shows up with Debug or ReleaseSafe safety enabled)
-- [ ] support scientific notation in floating constants
+- [x] support scientific notation in floating constants

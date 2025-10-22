@@ -55,7 +55,8 @@ All expressions (equality or otherwise) found here evaluate to the boolean value
 Because it would be a massive pain otherwise, you may specify multiple statements/expressions by separating them with a semicolon (`;`).
 
 ## <span id="advanced-syntax">Advanced Syntax</span> [↩](#contents)
-No, there's no scientific notation yet (it's planned though).
+~~No, there's no scientific notation yet (it's planned though).~~
+There is now support for scientific notation. This addition means that expressions like `2e` will be interpreted as `2` rather than as `2*e`, so take care to remember that.
 
 MML also supports the use of vectors of any length (it gets weird if the length is 0, though).
 A vector may be created via this syntax for a vector literal:
