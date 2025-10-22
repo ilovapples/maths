@@ -424,7 +424,7 @@ static bool MML_expr_depends_on(MML_state *state, const MML_expr *expr, const st
 	if (expr == NULL)
 		return false;
 	
-	if (contains_ident_check(expr, (void *)target_name))
+	if (contains_ident_check(expr, target_name))
 		return true;
 	
 	if (expr->type == Identifier_type)
@@ -502,7 +502,7 @@ MML_value MML_eval_expr_recurse(MML_state *restrict state, const MML_expr *expr)
 		if (MML_expr_depends_on(state, right, &left->s))
 		{
 			MML_log_err("recursive or circular dependency found in definition of '%.*s'\n",
-			(int)left->s.len, left->s, left->s.s);
+			(int)left->s.len, left->s.s);
 
 			return VAL_INVAL;
 		}
