@@ -175,15 +175,38 @@ static MML_token get_next_token(const char **s, struct parser_state *state)
 		break;
 	case MML_DIGIT_TOK: {
 		const char *const start = cached_s;
-		while (isdigit(*cached_s))
-			++cached_s;
-		if (!state->looking_for_int && *cached_s == '.')
+		bool has_dot = false;
+		bool has_underscore = false;
+
+		while (true)
 		{
-			++cached_s;
-			while (isdigit(*cached_s))
+			if (isdigit(*cached_s)) {
 				++cached_s;
+			} else if (*cached_s == '_' && isdigit(cached_s[1])) {
+				cached_s += 2;
+				has_underscore = true;
+			} else if (!state->looking_for_int && *cached_s == '.' && !has_dot) {
+				has_dot = true;
+				++cached_s;
+			} else {
+				break;
+			}
 		}
-		ret = nToken(MML_NUMBER_TOK, start, cached_s - start);
+
+		size_t raw_len = cached_s - start;
+
+		if (!has_underscore) {
+			ret = nToken(MML_NUMBER_TOK, start, raw_len);
+			break;
+		}
+		
+		char *buf = arena_alloc_T(MML_global_arena, raw_len, char);
+		char *dst = buf;
+
+		for (const char *src = start; src < cached_s && (size_t)(dst - buf) < raw_len - 1; ++src)
+			if (*src != '_') *dst++ = *src;
+
+		ret = nToken(MML_NUMBER_TOK, buf, dst - buf);
 		break;
 	}
 	case MML_LETTER_TOK:

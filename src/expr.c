@@ -222,18 +222,3 @@ inline _Complex double MML_get_complex(const MML_value *v)
 		? v->cn
 		: MML_get_number(v) + 0.0*I;
 }
-
-MML_expr *MML_expr_search_for(MML_expr *e, void *context, bool (*check_fn) (const MML_expr *, void *))
-{
-	if (e->type == Operation_type) {
-		MML_expr *t;
-		if ((t = MML_expr_search_for(e->o.left, context, check_fn)) != NULL) return t;
-
-		if (e->o.right != NULL
-		 && (t = MML_expr_search_for(e->o.right, context, check_fn)) != NULL) return t;
-	}
-	if (check_fn(e, context))
-		return e;
-
-	return NULL;
-}

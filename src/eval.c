@@ -411,6 +411,49 @@ MML_value MML_apply_binary_op(MML_state *restrict state, MML_value a, MML_value 
 	return VAL_INVAL;
 }
 
+bool contains_ident_check(const MML_expr *e, void *context)
+{
+	const strbuf *const ident = context;
+	return e->type == Identifier_type
+		&& e->s.len == ident->len
+		&& memcmp(ident->s, e->s.s, ident->len) == 0;
+}
+
+static bool MML_expr_depends_on(MML_state *state, const MML_expr *expr, const strbuf *target_name)
+{
+	if (expr == NULL)
+		return false;
+	
+	if (contains_ident_check(expr, (void *)target_name))
+		return true;
+	
+	if (expr->type == Identifier_type)
+	{
+		MML_expr *dep = MML_eval_get_variable(state, expr->s);
+
+		if (dep != NULL && MML_expr_depends_on(state, dep, target_name))
+			return true;
+	}
+
+	if (expr->type == Operation_type)
+	{
+		if (MML_expr_depends_on(state, expr->o.left, target_name))
+			return true;
+		
+		if (MML_expr_depends_on(state, expr->o.right, target_name))
+			return true;
+	}
+
+	if (expr->type == Vector_type)
+	{
+		for (size_t i = 0; i < expr->v.n; ++i)
+			if (MML_expr_depends_on(state, expr->v.ptr[i], target_name))
+				return true;
+	}
+
+	return false;
+}
+
 MML_value MML_eval_expr_recurse(MML_state *restrict state, const MML_expr *expr)
 {
 	if (!state->is_init)
@@ -455,10 +498,11 @@ MML_value MML_eval_expr_recurse(MML_state *restrict state, const MML_expr *expr)
 	MML_expr *right = expr->o.right;
 
 	if (expr->o.op == MML_OP_ASSERT_EQUAL && left != NULL && left->type == Identifier_type) {
-		bool contains_ident_check(const MML_expr *, void *);
-		if (MML_expr_search_for(right, &left->s, contains_ident_check) != NULL) {
-			MML_log_err("recursive dependency found in definition of '%.*s'\n",
-					(int)left->s.len, left->s.s);
+		if (MML_expr_depends_on(state, right, &left->s))
+		{
+			MML_log_err("circular dependency found in definition of '%.*s'\n",
+				(int)left->s.len, left->s.s);
+
 			return VAL_INVAL;
 		}
 		MML_eval_set_variable(state, left->s, right);
@@ -480,14 +524,6 @@ MML_value MML_eval_expr_recurse(MML_state *restrict state, const MML_expr *expr)
 			MML_eval_expr_recurse(state, left),
 			(right != NULL) ? MML_eval_expr_recurse(state, right) : VAL_INVAL,
 			expr->o.op);
-}
-
-bool contains_ident_check(const MML_expr *e, void *context)
-{
-	const strbuf *const ident = context;
-	return e->type == Identifier_type
-		&& e->s.len == ident->len
-		&& memcmp(ident->s, e->s.s, ident->len) == 0;
 }
 
 inline MML_value MML_eval_expr(MML_state *restrict state, const MML_expr *expr)

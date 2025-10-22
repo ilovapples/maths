@@ -107,8 +107,6 @@ void MML_free_pp(void *p);
 double MML_get_number(const MML_value *v);
 _Complex double MML_get_complex(const MML_value *v);
 
-MML_expr *MML_expr_search_for(MML_expr *e, void *context, bool (*check_fn) (const MML_expr *, void *));
-
 MML__CPP_COMPAT_END_DECLS
 
 #endif /* EXPR_H */
