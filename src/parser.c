@@ -176,6 +176,7 @@ static MML_token get_next_token(const char **s, struct parser_state *state)
 	case MML_DIGIT_TOK: {
 		const char *const start = cached_s;
 		bool has_dot = false;
+		bool has_exp = false;
 		bool has_underscore = false;
 
 		while (true)
@@ -188,9 +189,14 @@ static MML_token get_next_token(const char **s, struct parser_state *state)
 			} else if (!state->looking_for_int && *cached_s == '.' && !has_dot) {
 				has_dot = true;
 				++cached_s;
-			} else {
+			} else if (!state->looking_for_int && !has_exp && (*cached_s == 'e' || *cached_s == 'E')) {
+				has_exp = true;
+				++cached_s;
+				if (*cached_s == '+' || *cached_s == '-') ++cached_s;
+				if (!isdigit(*cached_s)) break;
+				while (isdigit(*cached_s)) ++cached_s;
+			} else
 				break;
-			}
 		}
 
 		size_t raw_len = cached_s - start;
