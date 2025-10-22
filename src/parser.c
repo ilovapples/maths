@@ -192,13 +192,18 @@ static MML_token get_next_token(const char **s, struct parser_state *state)
 		}
 
 		size_t raw_len = cached_s - start;
-		char *clean = malloc(raw_len + 1);
-		char *dst = clean;
-		for (const char *src = start; src < cached_s; ++src)
+		char buf[256];
+		if (raw_len >= sizeof(buf))
+			raw_len = sizeof(buf) - 1;
+		
+		char *dst = buf;
+
+		for (const char *src = start; src < cached_s && (size_t)(dst - buf) < sizeof(buf) - 1; ++src)
 			if (*src != '_') *dst++ = *src;
+		
 		*dst = '\0';
 
-		ret = nToken(MML_NUMBER_TOK, clean, dst - clean);
+		ret = nToken(MML_NUMBER_TOK, buf, dst - buf);
 		break;
 	}
 	case MML_LETTER_TOK:

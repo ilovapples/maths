@@ -424,7 +424,7 @@ static bool MML_expr_depends_on(MML_state *state, const MML_expr *expr, const st
 	if (expr == NULL)
 		return false;
 	
-	if (contains_ident_check(expr, target_name))
+	if (contains_ident_check(expr, (void *)target_name))
 		return true;
 	
 	if (expr->type == Identifier_type)
