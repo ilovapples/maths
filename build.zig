@@ -1,4 +1,5 @@
 const std = @import("std");
+const zcc = @import("compile_commands");
 
 const mml_lib_source = [_][]const u8{
     "src/eval.c",
@@ -22,6 +23,8 @@ const include_path: []const u8 = "incl";
 const c_hashmap_include_path: []const u8 = "c-hashmap";
 
 pub fn build(b: *std.Build) void {
+    var build_targets_list = std.ArrayListUnmanaged(*std.Build.Step.Compile){};
+
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
     const is_debug = b.option(bool, "debug", "should build with debug output and '-g' compiler option (separate from -d output on the executable?)");
@@ -60,6 +63,7 @@ pub fn build(b: *std.Build) void {
     });
 
     b.installArtifact(libmml);
+    build_targets_list.append(b.allocator, libmml) catch @panic("OOM");
 
 
     // MML EXECUTABLE
@@ -82,4 +86,7 @@ pub fn build(b: *std.Build) void {
     mml_exe_mod.linkLibrary(libmml);
 
     b.installArtifact(mml_exe);
+    build_targets_list.append(b.allocator, mml_exe) catch @panic("OOM");
+
+    _ = zcc.createStep(b, "cdb", build_targets_list.toOwnedSlice(b.allocator) catch @panic("OOM"));
 }

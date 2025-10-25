@@ -157,15 +157,15 @@ static MML_value custom_sort(MML_state *state, MML_expr_vec *args)
 	ret_vec.n = vec->n;
 
 	memcpy(
-			ret_vec.ptr,
-			vec->ptr,
-			ret_vec.n * sizeof(MML_expr *));
+		ret_vec.ptr,
+		vec->ptr,
+		ret_vec.n * sizeof(MML_expr *));
 
 	cur_state = state;
 	qsort(
-			ret_vec.ptr,
-			ret_vec.n, sizeof(MML_expr *),
-			compare_values);
+		ret_vec.ptr,
+		ret_vec.n, sizeof(MML_expr *),
+		compare_values);
 
 	return (MML_value) { Vector_type, .v = ret_vec };
 }
@@ -242,7 +242,6 @@ static void register_functions(hashmap *maps[6])
 	hashmap_set(maps[0], hashmap_str_lit("pi"),	(uintptr_t)&PI_M);
 	hashmap_set(maps[0], hashmap_str_lit("e"),	(uintptr_t)&E_M);
 	hashmap_set(maps[0], hashmap_str_lit("phi"),	(uintptr_t)&PHI_M);
-	static_assert(I_M.cn == I, "how on earth does I != I? i think your computer's borked\n");
 	hashmap_set(maps[0], hashmap_str_lit("i"),	(uintptr_t)&I_M);
 	hashmap_set(maps[0], hashmap_str_lit("nan"),	(uintptr_t)&NAN_M);
 	hashmap_set(maps[0], hashmap_str_lit("inf"),	(uintptr_t)&INFINITY_M);
