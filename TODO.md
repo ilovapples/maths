@@ -20,7 +20,8 @@
 - [x] fix prompt so it reads data in 1 byte minimum chunks (now it's 8 bytes for one character read,
       so stdin doesn't work unless you're currently the one using the prompt via shell input or something) (thanks @35rod)
 - [x] fix Ctrl+D not quitting prompt if the cursor isn't on the first character
-- [?] add check for recursive variable definition (currently segfaults from stack overflow)
+- [x] add check for recursive variable definition (currently segfaults from stack overflow)
 - [x] fix '~' operator not being used properly in the parser (reads past the end of PRECEDENCE, errors if optimizing with Debug or ReleaseSafe on `zig build`, but not if optimizing without safety, like with `make` or ReleaseFast)
-- [ ] fix the bug shown in `tests/bug1.log` (probably only shows up with Debug or ReleaseSafe safety enabled)
+- [x] fix the bug shown in `tests/bug1.log` (probably only shows up with Debug or ReleaseSafe safety enabled) (only because `sort` only takes vector literal, but that's fixed)
 - [x] support scientific notation in floating constants
+- [ ] change core library functions to take `MML_expr_vec args` instead of `MML_expr_vec *args`

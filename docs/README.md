@@ -124,4 +124,4 @@ In the leftmost section of a function's entry in this list, `...` represents the
 - `config_set{ident, val}` = sets the value of the configuration option specified by `ident` to `val`. Valid types for `val` depend on the config option specified by `ident`. 
 - `max{...}` = returns the greatest of its arguments, where each of its arguments must be a real number or a Boolean value (the `max` function makes little sense on unordered values such as complex numbers).
 - `min{...}` = returns the least of its arguments, where each of its arguments must be a real number or a Boolean value (the `min` function makes little sense on unordered values such as complex numbers).
-- `sort{v}` = returns a sorted copy of its first argument `v`, a vector (has to be a vector literal, but not for a good reason; I just haven't gotten around to fixing it yet)
+- `sort{v}` = returns a sorted copy of its first argument `v`, a vector

@@ -151,14 +151,16 @@ static int compare_values(const void *a, const void *b)
 
 static MML_value custom_sort(MML_state *state, MML_expr_vec *args)
 {
-	const MML_expr_vec *vec = &args->ptr[0]->v;
+	const MML_value vec = MML_eval_expr(state, args->ptr[0]);
+	if (vec.type != Vector_type) return VAL_INVAL;
+
 	MML_expr_vec ret_vec;
-	ret_vec.ptr = arena_alloc_T(MML_global_arena, vec->n, MML_expr *);
-	ret_vec.n = vec->n;
+	ret_vec.ptr = arena_alloc_T(MML_global_arena, vec.v.n, MML_expr *);
+	ret_vec.n = vec.v.n;
 
 	memcpy(
 		ret_vec.ptr,
-		vec->ptr,
+		vec.v.ptr,
 		ret_vec.n * sizeof(MML_expr *));
 
 	cur_state = state;

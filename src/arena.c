@@ -1,6 +1,5 @@
 #include "arena/arena.h"
 
-#include <malloc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -59,11 +58,12 @@ void free_arena_buckets(ArenaBucket *first)
 
 #define MAX(a,b) ((a<b) ? b : a)
 
-#define ARENA_REALLOC_FACTOR 2
 void *arena_alloc(Arena *arena, size_t size, size_t align)
 {
 	if (align != 0)
-		arena->index += (align - (arena->index % align)); // round index so 'align' is fulfilled and zig doesn't flag it as UB
+		arena->index = align + (arena->index & ~(align-1));
+	// round up index to align; works because align is guaranteed to be a power of 2
+
 	void *ret_ptr = &arena->current->base[arena->index];
 
 	if (arena->index + size > arena->bucket_init_size)
