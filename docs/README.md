@@ -9,7 +9,7 @@
 ## <span id="concepts">Concepts</span> [↩](#contents)
 MML is a sort of mathematical scripting language with support for several mathematic data types, including real and complex numbers, vectors, and Booleans, with more planned (?) for the future.
 
-There a sort of 'concept' (hence the heading) that needs to be cleared up. In MML, when an expression is assigned to a variable, like `x = 9 + 3`, it is _literally_ assigned to the variable. This is distinct from the behavior of most _programming_
+There is a sort of 'concept' (hence the heading) that needs to be cleared up. In MML, when an expression is assigned to a variable, like `x = 9 + 3`, it is _literally_ assigned to the variable. This is distinct from the behavior of most _programming_
 languages, which would in this situation evaluate the expression and assign the _value_ to the variable, not the expression itself. This decision was made 1. because I didn't have a great plan going into this project, and 2. because I think this 
 behavior better reflects what would observed in an algebraic system. This interesting design allows for things like the following to be allowed (using python highlighting because it's probably easier to read):
 ```python
