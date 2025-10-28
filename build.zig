@@ -53,7 +53,7 @@ pub fn build(b: *std.Build) void {
         .root_module = libmml_mod,
     });
     // source + include
-    libmml.installHeadersDirectory(b.path(include_path), "", .{});
+    libmml.installHeadersDirectory(b.path(include_path), ".", .{});
     if (is_debug == null or !is_debug.?) libmml_mod.addCMacro("NDEBUG", "");
     libmml_mod.addIncludePath(b.path(include_path));
     libmml_mod.addIncludePath(b.path(c_hashmap_include_path));

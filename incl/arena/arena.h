@@ -14,7 +14,7 @@ typedef struct Arena Arena;
 // bucket_init_size is the number of bytes to allocate
 // for each bucket, if a given allocation won't fit in
 // the current bucket but would fit in a new one
-Arena *arena_make(size_t bucket_init_size);
+Arena *arena_create(size_t bucket_init_size);
 void arena_destroy(Arena *arena);
 
 void *arena_alloc(Arena *arena, size_t size, size_t align);

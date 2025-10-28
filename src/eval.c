@@ -47,7 +47,7 @@ MML_state *MML_init_state(void)
 	if (eval_builtins_are_initialized)
 		goto skip_builtins_init;
 
-	MML_global_arena = arena_make(8192);
+	MML_global_arena = arena_create(8192);
 
 	eval_builtin_maps[1] = hashmap_create();
 	eval_builtin_maps[2] = hashmap_create();

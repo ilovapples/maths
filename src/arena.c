@@ -20,7 +20,7 @@ typedef struct Arena {
 } Arena;
 
 
-Arena *arena_make(size_t bucket_init_size)
+Arena *arena_create(size_t bucket_init_size)
 {
 	Arena *ret = calloc(1, sizeof(Arena));
 	ret->bucket_init_size = bucket_init_size;
