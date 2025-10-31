@@ -411,6 +411,20 @@ MML_value MML_apply_binary_op(MML_state *restrict state, MML_value a, MML_value 
 	return VAL_INVAL;
 }
 
+static inline MML_expr MML_value_to_expr(MML_value v) {
+	MML_expr e = {0};
+	e.type = v.type;
+	switch(v.type) {
+		case RealNumber_type: e.n = v.n; break;
+		case ComplexNumber_type: e.cn = v.cn; break;
+		case Boolean_type: e.b = v.b; break;
+		case Vector_type: e.v = v.v; break;
+		default: break;
+	}
+
+	return e;
+}
+
 bool contains_ident_check(const MML_expr *e, void *context)
 {
 	const strbuf *const ident = context;
@@ -452,6 +466,38 @@ static bool MML_expr_depends_on(MML_state *state, const MML_expr *expr, const st
 	}
 
 	return false;
+}
+
+static MML_value MML_call_user_function(MML_state *state, const MML_expr *func, const MML_value *args)
+{
+	if (!func || func->type != UserFunc_type)
+		return VAL_INVAL;
+	
+	if (func->uf.params.n != args->v.n) {
+		MML_log_err("function expected %zu arguments, got %zu\n", func->uf.params.n, args->v.n);
+		return VAL_INVAL;
+	}
+
+	hashmap *outer_scope = state->variables;
+	hashmap *locals = hashmap_create();
+	state->variables = locals;
+
+	for (size_t i = 0; i < func->uf.params.n; i++) {
+		MML_expr *param = func->uf.params.ptr[i];
+		if (param->type != Identifier_type) continue;
+
+		MML_expr *val_expr = arena_alloc_T(MML_global_arena, 1, MML_expr);
+		*val_expr = MML_value_to_expr(MML_eval_expr_recurse(state, args->v.ptr[i]));
+
+		hashmap_set(locals, param->s.s, param->s.len, (uintptr_t)val_expr);
+	}
+
+	MML_value result = MML_eval_expr_recurse(state, func->uf.body);
+
+	hashmap_free(locals);
+	state->variables = outer_scope;
+
+	return result;
 }
 
 MML_value MML_eval_expr_recurse(MML_state *restrict state, const MML_expr *expr)
@@ -497,27 +543,39 @@ MML_value MML_eval_expr_recurse(MML_state *restrict state, const MML_expr *expr)
 	MML_expr *left = expr->o.left;
 	MML_expr *right = expr->o.right;
 
-	if (expr->o.op == MML_OP_ASSERT_EQUAL && left != NULL && left->type == Identifier_type) {
-		if (MML_expr_depends_on(state, right, &left->s))
-		{
-			MML_log_err("circular dependency found in definition of '%.*s'\n",
-				(int)left->s.len, left->s.s);
+	if (expr->o.op == MML_OP_ASSERT_EQUAL) {
+		if (left->type == Operation_type && left->o.op == MML_OP_FUNC_CALL_TOK && left->o.left && left->o.left->type == Identifier_type) {
+			MML_expr *func_expr = arena_alloc_T(MML_global_arena, 1, MML_expr);
+			func_expr->type = UserFunc_type;
+			func_expr->uf.params = left->o.right->v;
+			func_expr->uf.body = right;
 
-			return VAL_INVAL;
+			MML_eval_set_variable(state, left->o.left->s, func_expr);
+
+			return VAL_BOOL(true);
+		} else if (left != NULL && left->type == Identifier_type) {
+			if (MML_expr_depends_on(state, right, &left->s))
+			{
+				MML_log_err("circular dependency found in definition of '%.*s'\n",
+					(int)left->s.len, left->s.s);
+
+				return VAL_INVAL;
+			}
+			MML_eval_set_variable(state, left->s, right);
+			return MML_eval_expr_recurse(state, right);
 		}
-		MML_eval_set_variable(state, left->s, right);
-		return MML_eval_expr_recurse(state, right);
 	} else if (expr->o.op == MML_OP_FUNC_CALL_TOK) {
-		if (left == NULL
-		 || right == NULL
-		 || left->type != Identifier_type)
+		if (!left || !right || left->type != Identifier_type)
 			return VAL_INVAL;
+		
+		MML_value args_val = MML_eval_expr_recurse(state, right);
 
-		MML_value right_val_vec = MML_eval_expr_recurse(state, right);
-		if (right_val_vec.type == Invalid_type)
-			return VAL_INVAL;
+		MML_expr *user_func = MML_eval_get_variable(state, left->s);
 
-		return apply_func(state, left->s, right_val_vec);
+		if (user_func && user_func->type == UserFunc_type)
+			return MML_call_user_function(state, user_func, &args_val);
+		
+		return apply_func(state, left->s, args_val);
 	}
 
 	return MML_apply_binary_op(state,
@@ -530,7 +588,6 @@ inline MML_value MML_eval_expr(MML_state *restrict state, const MML_expr *expr)
 {
 	return state->last_val = MML_eval_expr_recurse(state, expr);
 }
-
 
 MML_value MML_eval_parse(MML_state *restrict state, const char *s)
 {

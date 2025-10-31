@@ -14,6 +14,11 @@ MML__CPP_COMPAT_BEGIN_DECLS
 
 typedef struct MML_expr MML_expr;
 
+typedef struct {
+	MML_expr **ptr;
+	size_t n;
+} MML_expr_vec;
+
 typedef struct MML_Operation {
 	MML_expr *left;
 	MML_expr *right;
@@ -29,12 +34,13 @@ typedef enum MML_ExprType {
 	Boolean_type,
 	Identifier_type,
 	Vector_type,
+	UserFunc_type
 } MML_expr_type;
 
-typedef struct {
-	MML_expr **ptr;
-	size_t n;
-} MML_expr_vec;
+typedef struct MML_UserFunc {
+	MML_expr_vec params;
+	MML_expr *body;
+} MML_user_func;
 
 typedef dvec_t(MML_expr *) MML_expr_dvec;
 
@@ -69,6 +75,7 @@ typedef struct MML_expr {
 		bool b;
 		strbuf s;
 		MML_expr_vec v;
+		MML_user_func uf;
 		int64_t i;
 		struct value_union_size w; // used for copying the union between MML_expr's
 	};
