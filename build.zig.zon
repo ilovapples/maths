@@ -1,10 +1,18 @@
 .{
     .name = .maths,
-    .version = "0.15.2",
+    .version = "0.15.1",
     .dependencies = .{
         .compile_commands = .{
             .url = "https://github.com/the-argus/zig-compile-commands/archive/70fb439897e12cae896c071717d7c9c382918689.tar.gz",
             .hash = "zig_compile_commands-0.0.1-OZg5-ULBAABTh3NXO3WXoSUX1474ez0EouuoT2yDANhz",
+        },
+        .cvi = .{
+            .url = "git+https://github.com/ilovapples/custom-vector-implementations.git#7380717d140b4d5519996940aeba0a04ae137767",
+            .hash = "cvi-0.0.1-csaOICmNAACTB8xEH7PfkNnGJW6XKgAj8jYk12Jfhz_3",
+        },
+        .@"c-hashmap" = .{
+            .url = "git+https://github.com/mashpoe/c-hashmap#98bbfe006640a411a9d8c949a46a712edbbbf891",
+            .hash = "N-V-__8AANlrAAAMjY1nSECu9eV1uvIZvD5PxHZBXHI_CMU3",
         },
     },
     .paths = .{""},

@@ -9,13 +9,16 @@ EXEC := mml
 
 #NO_DEBUG := -DNDEBUG
 
+CVI_PATH := cvi
+CHASHMAP_PATH := c-hashmap
+
 FPIC_FLAG := 
-CFLAGS := -Wall -Wextra -Wno-date-time -std=c23 -Iincl -I. $(NO_DEBUG) -O3 -g
+CFLAGS := -Wall -Wextra -Wno-date-time -std=c23 -Iincl -I$(CHASHMAP_PATH) -I$(CVI_PATH) $(NO_DEBUG) -O3 -g
 LDFLAGS := $(CFLAGS) -lm
 
-.PHONY: cleanobjs clean static_lib shared_lib print_done
+.PHONY: static_lib shared_lib print_done
 
-all: build obj \
+all: build obj build/INITIALIZED_SUBMODULES \
 	print_building_func_libs build_func_libs print_done_libs \
 	print_building_objects $(OBJECTS) print_done_obj \
 	print_building_exe build/$(EXEC) print_done_exe
@@ -79,6 +82,14 @@ obj:
 build:
 	mkdir build
 
+# git submodules
+build/INITIALIZED_SUBMODULES:
+	@if test -f "build/INITIALIZED_SUBMODULES"; then \
+		exit; \
+	fi
+	git submodule update --init
+	touch build/INITIALIZED_SUBMODULES
+
 
 # library targets
 static_lib: cleanobjs build/lib$(EXEC).a
@@ -93,8 +104,13 @@ build/lib$(EXEC).so: build obj Makefile build_func_libs_shared $(OBJECTS)
 
 
 # clean targets
+.PHONY: cleanobjs clean_modules clean clean_all
 cleanobjs:
 	rm -f obj/*
 	$(MAKE) -C lib clean
+clean_modules:
+	git submodule deinit --all
+	rm -f build/INITIALIZED_SUBMODULES
 clean: cleanobjs
 	rm -f build/*
+clean_all: clean clean_modules

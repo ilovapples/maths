@@ -1,11 +1,12 @@
 #include <math.h>
+#include <stdlib.h>
 #include <complex.h>
 
 #include "arena/arena.h"
 #include "mml/expr.h"
 #include "mml/eval.h"
 #include "mml/config.h"
-#include "c-hashmap/map.h"
+#include "map.h"
 
 static _Complex double custom_clog2(_Complex double a)
 {

@@ -8,7 +8,7 @@
 #include "cpp_compat.h"
 
 #include "mml/token.h"
-#include "cvi/dvec/dvec.h"
+#include "dvec/dvec.h"
 
 MML__CPP_COMPAT_BEGIN_DECLS
 

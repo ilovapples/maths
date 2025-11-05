@@ -8,7 +8,7 @@
 #include "mml/token.h"
 #include "mml/config.h"
 #include "arena/arena.h"
-#include "cvi/dvec/dvec.h"
+#include "dvec/dvec.h"
 
 const char *const TOK_STRINGS[] = {
 	"OP_FUNC_CALL",

@@ -14,8 +14,8 @@
 #include "mml/token.h"
 #include "mml/parser.h"
 #include "arena/arena.h"
-#include "cvi/dvec/dvec.h"
-#include "c-hashmap/map.h"
+#include "dvec/dvec.h"
+#include "map.h"
 
 /* 0 constants
  * 1 tv_tv_funcs

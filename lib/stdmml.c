@@ -5,7 +5,7 @@
 #include "mml/expr.h"
 #include "mml/config.h"
 #include "mml/parser.h"
-#include "c-hashmap/map.h"
+#include "map.h"
 
 static MML_value custom_dbg_type(MML_state *state, MML_expr_vec *args)
 {

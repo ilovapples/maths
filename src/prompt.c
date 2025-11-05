@@ -16,7 +16,7 @@
 #include "mml/expr.h"
 #include "mml/eval.h"
 #include "mml/parser.h"
-#include "cvi/dvec/dvec.h"
+#include "dvec/dvec.h"
 
 #define NSEC_IN_SEC 1000000000ULL
 #define PROMPT_STR "\033[1;33m>>\033[0m "

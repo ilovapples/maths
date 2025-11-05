@@ -6,14 +6,12 @@ Not much, but there is a syntax guide [here](docs/README.md) if you want to read
 
 # building
 ```sh
-git submodule update --init # first time
 make
 ```
 Then run `build/mml --help` to display the command-line options.
 ## NEW!
 If you have `zig` installed, you can use `zig build` to build the library and executable. Here are the commands:
 ```sh
-git submodule update --init # first time
 zig build
 ```
 You can run `zig build -Doptimize=ReleaseFast` to get more optimization. `zig build` also allows

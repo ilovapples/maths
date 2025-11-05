@@ -9,7 +9,7 @@
 #include "mml/parser.h"
 #include "mml/config.h"
 #include "mml/prompt.h"
-#include "cvi/dvec/dvec.h"
+#include "dvec/dvec.h"
 
 extern strbuf expression;
 
