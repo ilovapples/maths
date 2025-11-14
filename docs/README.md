@@ -18,7 +18,12 @@ F = 80
 C === 26 + 2/3
 ```
 Notice that `F` wasn't defined before the second line `F = 80`, and yet `C` was well defined by its definition regardless of being dependent on the value of `F`. This also means that, when `F` is changed and `C` is reevaluated, it will reflect
-the new value of `F`, almost as if `C` were a function `C{F}` (functions in this form are planned, but work has not begun just yet).
+the new value of `F`, almost as if `C` were a function `C{F}` ~~(functions in this form are planned, but work has not begun just yet)~~. <br />
+Update: you can now define your own functions! Here's what the above example would look like with this feature:
+```python
+C{F} = (F-32) * 5/9
+C{80} === 26 + 2/3
+```
 
 A variable/expression is 'evaluated' when it is used anywhere other than a variable definition or in a vector literal (see [Advanced Syntax](#advanced-syntax) for more on vectors). The interactive prompt (accessed via `-I` or `--interactive` from
 the executable) automatically evaluates the last expression in each input line, but nothing is automatically evaluated if using the pure library (or the `--expr=` and `--no-eval` options combined, which specify an expression to parse but not
