@@ -178,6 +178,21 @@ void MML_print_expr(struct MML_config *config, const MML_expr *expr, uint32_t in
 		MML_print_indent(indent);
 		putchar(')');
 		break;
+	case FuncObject_type:
+		printf("FuncObject(params=[");
+		for (size_t i = 0; i < expr->fo.params.len; ++i)
+		{
+			const strbuf cur_param_name = expr->fo.params.ptr[i];
+			printf("'%.*s'%s",
+					(int)cur_param_name.len,
+					cur_param_name.s,
+					(i < expr->fo.params.len-1) ? "," : "");
+		}
+		printf("], body=");
+		MML_print_expr(config, expr->fo.body, indent);
+		MML_print_indent(indent);
+		putchar(')');
+		break;
 	default:
 		printf("Invalid()");
 		break;
@@ -192,7 +207,7 @@ inline void MML_print_exprh(const MML_expr *expr)
 	fputc('\n', stdout);
 	MML_global_config.last_print_was_newline = true;
 }
-inline MML_value MML_print_exprh_tv_func(MML_state *state, MML_expr_vec *args)
+MML_value MML_print_exprh_tv_func(MML_state *state, MML_expr_vec *args)
 {
 	MML_print_expr(state->config, args->ptr[0], 0);
 	fputc('\n', stdout);

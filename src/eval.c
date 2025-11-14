@@ -74,6 +74,7 @@ MML_state *MML_init_state(void)
 skip_builtins_init:
 
 	state->variables = nullptr;
+	state->locals = nullptr;
 
 
 	state->is_init = true;
@@ -84,15 +85,17 @@ skip_builtins_init:
 
 void MML_cleanup_state(MML_state *restrict state)
 {
-	if (state->variables != nullptr)
-	{
+	if (state->variables != nullptr) {
 		hashmap_free(state->variables);
 		state->variables = nullptr;
 	}
+	if (state->locals != nullptr) {
+		hashmap_free(state->locals);
+		state->locals = nullptr;
+	}
 
 	state->is_init = false;
-	if (--initialized_evaluators_count == 0)
-	{
+	if (--initialized_evaluators_count == 0) {
 		for (uint8_t i = 0; i < 6; ++i)
 		{
 			hashmap_free(eval_builtin_maps[i]);
@@ -118,6 +121,10 @@ MML_expr *MML_eval_get_variable(MML_state *restrict state,
 		strbuf name)
 {
 	MML_expr *out;
+	if (state->locals != nullptr &&
+			hashmap_get(state->locals, name.s, name.len, (uintptr_t *)&out))
+		return out;
+
 	if (state->variables != nullptr && 
 			hashmap_get(state->variables, name.s, name.len, (uintptr_t *)&out))
 		return out;
@@ -130,6 +137,33 @@ MML_expr *MML_eval_get_variable(MML_state *restrict state,
 static MML_value apply_func(MML_state *restrict state,
 		strbuf ident, MML_value right_vec)
 {
+	MML_expr *fo_expr;
+	if (state->variables != nullptr &&
+			hashmap_get(state->variables, ident.s, ident.len, (uintptr_t *)&fo_expr)) {
+		if (fo_expr->type != FuncObject_type) {
+			MML_log_warn("call to function '%.*s' failed: function name shadowed by non-function object variable.",
+					(int)ident.len, ident.s);
+			return VAL_INVAL;
+		}
+		if (state->locals) hashmap_free(state->locals);
+		state->locals = hashmap_create();
+		const MML_func_object fo = fo_expr->fo;
+
+		if (right_vec.v.n != fo.params.len) {
+			MML_log_err("call to function '%.*s' failed: expected %zu arguments; found %zu.",
+					(int)ident.len, ident.s, fo.params.len, right_vec.v.n);
+			return VAL_INVAL;
+		}
+
+		for (size_t i = 0; i < fo.params.len; ++i)
+		{
+			const strbuf param_ident = fo.params.ptr[i];
+			hashmap_set(state->locals, param_ident.s, param_ident.len, (uintptr_t)right_vec.v.ptr[i]);
+		}
+
+		return MML_eval_expr(state, fo.body);
+	}
+
 	MML_val_func vec_args_func;
 	if (hashmap_get(eval_builtin_maps[1], ident.s, ident.len, (uintptr_t *)&vec_args_func))
 		return ((*vec_args_func)(state, &right_vec.v));
@@ -497,16 +531,42 @@ MML_value MML_eval_expr_recurse(MML_state *restrict state, const MML_expr *expr)
 	MML_expr *left = expr->o.left;
 	MML_expr *right = expr->o.right;
 
-	if (expr->o.op == MML_OP_ASSERT_EQUAL && left != NULL && left->type == Identifier_type) {
-		if (MML_expr_depends_on(state, right, &left->s))
-		{
-			MML_log_err("circular dependency found in definition of '%.*s'\n",
-				(int)left->s.len, left->s.s);
+	if (expr->o.op == MML_OP_ASSERT_EQUAL && left != NULL) {
+		if (left->type == Identifier_type) {
+			if (MML_expr_depends_on(state, right, &left->s)) {
+				MML_log_err("circular dependency found in definition of '%.*s'\n",
+					(int)left->s.len, left->s.s);
 
-			return VAL_INVAL;
+				return VAL_INVAL;
+			}
+			MML_eval_set_variable(state, left->s, right);
+			return MML_eval_expr_recurse(state, right);
+		} else if (left->type == Operation_type && left->o.op == MML_OP_FUNC_CALL_TOK
+				&& left->o.left->type == Identifier_type && left->o.right->type == Vector_type) {
+			MML_func_object fo;
+			fo.params.ptr = arena_alloc_T(MML_global_arena, left->o.right->v.n, strbuf);
+			fo.params.len = left->o.right->v.n;
+			bool is_legal = true;
+			for (size_t i = 0; i < fo.params.len; ++i)
+			{
+				// could be memcpy, but I need to detect invalid function definitions, so I can't
+				if (left->o.right->v.ptr[i]->type != Identifier_type) {
+					MML_log_err("arguments to function definition must be identifiers; found '%s' type\n",
+							EXPR_TYPE_STRINGS[left->o.right->v.ptr[i]->type]);
+					is_legal = false;
+				}
+				fo.params.ptr[i] = left->o.right->v.ptr[i]->s;
+			}
+			fo.body = right;
+
+			MML_expr *const new_expr = arena_alloc_T(MML_global_arena, 1, MML_expr);
+			new_expr->type = FuncObject_type;
+			new_expr->fo = fo;
+
+			if (is_legal) MML_eval_set_variable(state, left->o.left->s, new_expr);
+
+			return VAL_INVAL; // should return 'nothing' when that's added
 		}
-		MML_eval_set_variable(state, left->s, right);
-		return MML_eval_expr_recurse(state, right);
 	} else if (expr->o.op == MML_OP_FUNC_CALL_TOK) {
 		if (left == NULL
 		 || right == NULL

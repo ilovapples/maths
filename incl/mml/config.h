@@ -82,6 +82,8 @@ static inline void MML_dbg_print_func(
 	fprintf(stream, "[%s %s:%zu] ", log_type_str, filename, line_n);
 	vfprintf(stream, fmt, args);
 
+	fflush(stream);
+
 	va_end(args);
 }
 #define MML_log(log_type, fmt, ...) (MML_dbg_print_func(__FILE_NAME__, __LINE__, stderr, log_type, fmt, ##__VA_ARGS__))

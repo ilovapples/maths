@@ -29,12 +29,23 @@ typedef enum MML_ExprType {
 	Boolean_type,
 	Identifier_type,
 	Vector_type,
+	FuncObject_type,
 } MML_expr_type;
 
 typedef struct {
 	MML_expr **ptr;
 	size_t n;
 } MML_expr_vec;
+
+typedef struct {
+	strbuf *ptr;
+	size_t len;
+} strslice;
+
+typedef struct {
+	strslice params;
+	MML_expr *body;
+} MML_func_object;
 
 typedef dvec_t(MML_expr *) MML_expr_dvec;
 
@@ -50,12 +61,13 @@ struct value_union_size {
 typedef struct MML_value {
 	MML_expr_type type;
 	union {
+		int64_t i;
 		double n;
 		_Complex double cn;
 		bool b;
 		strbuf s;
 		MML_expr_vec v;
-		int64_t i;
+		MML_func_object fo;
 		struct value_union_size w;
 	};
 } MML_value;
@@ -64,12 +76,14 @@ typedef struct MML_expr {
 	MML_expr_type type;
 	union {
 		MML_Operation o;
+
+		int64_t i;
 		double n;
 		_Complex double cn;
 		bool b;
 		strbuf s;
 		MML_expr_vec v;
-		int64_t i;
+		MML_func_object fo;
 		struct value_union_size w; // used for copying the union between MML_expr's
 	};
 } MML_expr;

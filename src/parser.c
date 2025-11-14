@@ -80,6 +80,7 @@ const char *const EXPR_TYPE_STRINGS[] = {
 	"boolean",
 	"identifier",
 	"vector",
+	"function object",
 };
 
 

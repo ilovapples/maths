@@ -18,6 +18,7 @@ typedef struct MML_state {
 	struct MML_config *config;
 
 	hashmap *variables;
+	hashmap *locals;
 
 	MML_value last_val;
 	bool is_init;
