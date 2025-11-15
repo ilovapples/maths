@@ -72,7 +72,9 @@ const char *const TOK_STRINGS[] = {
 };
 
 const char *const EXPR_TYPE_STRINGS[] = {
+	"output code",
 	"invalid",
+	"nothing",
 	"operation",
 	"integer",
 	"real number",
@@ -178,7 +180,7 @@ static MML_token get_next_token(const char **s, struct parser_state *state)
 		const char *const start = cached_s;
 		bool has_dot = false;
 		bool has_exp = false;
-		bool has_underscore = false;
+		size_t n_underscores = 0;
 
 		while (true)
 		{
@@ -186,7 +188,7 @@ static MML_token get_next_token(const char **s, struct parser_state *state)
 				++cached_s;
 			} else if (*cached_s == '_' && isdigit(cached_s[1])) {
 				cached_s += 2;
-				has_underscore = true;
+				++n_underscores;
 			} else if (!state->looking_for_int && *cached_s == '.' && !has_dot) {
 				has_dot = true;
 				++cached_s;
@@ -196,18 +198,17 @@ static MML_token get_next_token(const char **s, struct parser_state *state)
 				if (*cached_s == '+' || *cached_s == '-') ++cached_s;
 				if (!isdigit(*cached_s)) break;
 				while (isdigit(*cached_s)) ++cached_s;
-			} else
-				break;
+			} else break;
 		}
 
 		size_t raw_len = cached_s - start;
 
-		if (!has_underscore) {
+		if (n_underscores == 0) {
 			ret = nToken(MML_NUMBER_TOK, start, raw_len);
 			break;
 		}
 		
-		char *buf = arena_alloc_T(MML_global_arena, raw_len, char);
+		char *buf = arena_alloc_T(MML_global_arena, raw_len-n_underscores, char);
 		char *dst = buf;
 
 		for (const char *src = start; src < cached_s && (size_t)(dst - buf) < raw_len - 1; ++src)

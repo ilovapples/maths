@@ -65,7 +65,7 @@ static void redraw_line(const char *buf, size_t cursor) {
     printf("\x1b[?25l");
     printf("\r\x1b[2K");
     printf("%s%s", PROMPT_STR, buf);
-    printf("\r\x1b[%zuC", PROMPT_STR_LEN + cursor);
+    printf("\x1b[%zuG", PROMPT_STR_LEN + cursor + 1);
     printf("\x1b[?25h");
     fflush(stdout);
 }
@@ -91,7 +91,7 @@ static bool handle_escape_seq(const char *seq, size_t seq_len, size_t *cursor, c
 	} else if ((seq_len == 3 && strncmp(seq, START_ANSI DOWN_C, seq_len) == 0) // if DOWN
 			|| (seq_len == 6 && strncmp(seq, ALT_ANSI RIGHT_C, seq_len) == 0) // or ALT+RIGHT
 			|| (seq_len == 6 && strncmp(seq, CTRL_ANSI RIGHT_C, seq_len) == 0)) { // or CTRL+RIGHT
-		*cursor = (line_len == 0) ? 0 : *line_len-1;
+		*cursor = (*line_len == 0) ? 0 : *line_len-1;
 	} else if ((seq_len == 4 && strncmp(seq, START_ANSI "3~", seq_len) == 0)) { // if DEL
 		char *const cursor_ptr = out + *cursor;
 		if (*line_len - *cursor > 0) { // if in the middle of the line
@@ -215,7 +215,7 @@ void MML_run_prompt(MML_state *state) {
 		
 		state->config->last_print_was_newline = true;
 
-		if (cur_val.type != Invalid_type) {
+		if (cur_val.type != OutputCode_type) {
 			printf("\033[2m────────────\033[0m\n");
 			MML_println_typedval(state, &cur_val);
 			printf("\033[2m────────────\033[0m\n");

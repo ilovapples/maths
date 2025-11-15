@@ -21,7 +21,9 @@ typedef struct MML_Operation {
 } MML_Operation;
 
 typedef enum MML_ExprType {
+	OutputCode_type,
 	Invalid_type,
+	Nothing_type,
 	Operation_type,
 	Integer_type,
 	RealNumber_type,
@@ -93,13 +95,15 @@ typedef struct MML_expr {
 #define VAL_CNUM(num) ((MML_value) { ComplexNumber_type, .cn = (num) })
 #define VAL_BOOL(bl) ((MML_value) { Boolean_type, .b = (bl) })
 
-enum INVAL_TYPES {
+enum CODE_TYPES {
 	MML_ERROR_INVAL,
 	MML_QUIT_INVAL,
 	MML_CLEAR_INVAL,
 };
 
-constexpr MML_value VAL_INVAL = { Invalid_type, .i = MML_ERROR_INVAL };
+constexpr MML_value VAL_INVAL = { Invalid_type, .w={} };
+constexpr MML_value NOTHING_VAL = { Nothing_type, .w={} };
+constexpr MML_expr NOTHING_EXPR = { Nothing_type, .w={} };
 
 #define VAL_IS_NUM(v) (\
     (v).type == RealNumber_type \

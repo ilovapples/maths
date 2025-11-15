@@ -60,8 +60,8 @@ MML_state *MML_init_state(void)
 
 
 	eval_builtin_maps[0] = hashmap_create();
-	static constexpr MML_value EXIT_CMD_M	= { Invalid_type, .i = MML_QUIT_INVAL };
-	static constexpr MML_value CLEAR_CMD_M	= { Invalid_type, .i = MML_CLEAR_INVAL };
+	static constexpr MML_value EXIT_CMD_M	= { OutputCode_type, .i = MML_QUIT_INVAL };
+	static constexpr MML_value CLEAR_CMD_M	= { OutputCode_type, .i = MML_CLEAR_INVAL };
 
 	hashmap_set(eval_builtin_maps[0], hashmap_str_lit("exit"),	(uintptr_t)&EXIT_CMD_M);
 	hashmap_set(eval_builtin_maps[0], hashmap_str_lit("clear"),	(uintptr_t)&CLEAR_CMD_M);
@@ -501,6 +501,7 @@ MML_value MML_eval_expr_recurse(MML_state *restrict state, const MML_expr *expr)
 	switch (expr->type) {
 	case Invalid_type:
 		return VAL_INVAL;
+	case Nothing_type: return NOTHING_VAL;
 	case Vector_type:
 		return (MML_value) { Vector_type, .v = expr->v };
 	case RealNumber_type:
@@ -568,7 +569,7 @@ MML_value MML_eval_expr_recurse(MML_state *restrict state, const MML_expr *expr)
 				if (is_legal) MML_eval_set_variable(state, left->o.left->s, new_expr);
 			}
 
-			return VAL_INVAL; // should return 'nothing' when that's added
+			return NOTHING_VAL; // should return 'nothing' when that's added
 		}
 	} else if (expr->o.op == MML_OP_FUNC_CALL_TOK) {
 		if (left == NULL

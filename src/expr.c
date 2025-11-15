@@ -21,9 +21,10 @@ MML_value MML_print_typedval(MML_state *state, const MML_value *val)
 	if (val == nullptr)
 	{
 		printf("(null)");
-		return VAL_INVAL;
+		return NOTHING_VAL;
 	}
 	switch (val->type) {
+	case Nothing_type: break;
 	case Integer_type:
 		printf("%" PRIi64, val->i);
 		break;
@@ -71,15 +72,15 @@ MML_value MML_print_typedval(MML_state *state, const MML_value *val)
 		fputc(']', stdout);
 		break;
 	case FuncObject_type:
-		printf("FuncObject");
+		fputs("FuncObject", stdout);
 		break;
 	default:
-		printf("(null)");
+		fputs("(null)", stdout);
 		break;
 	}
 
 	state->config->last_print_was_newline = false;
-	return (MML_value) { Invalid_type, .n = NAN };
+	return NOTHING_VAL;
 }
 
 inline MML_value MML_println_typedval(MML_state *state, const MML_value *val)
@@ -98,7 +99,7 @@ MML_value MML_print_typedval_multiargs(MML_state *state, MML_expr_vec *args)
 		if (i < args->n-1) fputc(' ', stdout);
 	}
 
-	return (MML_value) { Invalid_type, .n = NAN };
+	return NOTHING_VAL;
 }
 MML_value MML_println_typedval_multiargs(MML_state *state, MML_expr_vec *args)
 {
@@ -110,7 +111,7 @@ MML_value MML_println_typedval_multiargs(MML_state *state, MML_expr_vec *args)
 	if (args->n == 0)
 		fputc('\n', stdout);
 
-	return (MML_value) { Invalid_type, .n = NAN };
+	return NOTHING_VAL;
 }
 
 void MML_print_expr(struct MML_config *config, const MML_expr *expr, uint32_t indent)
@@ -137,6 +138,7 @@ void MML_print_expr(struct MML_config *config, const MML_expr *expr, uint32_t in
 		MML_print_indent(indent);
 		putchar(')');
 		break;
+	case Nothing_type: fputs("Nothing", stdout); break;
 	case Integer_type:
 		printf("Integer(%" PRIi64 ")", expr->i);
 		break;
@@ -182,7 +184,7 @@ void MML_print_expr(struct MML_config *config, const MML_expr *expr, uint32_t in
 		putchar(')');
 		break;
 	case FuncObject_type:
-		printf("FuncObject(params=[");
+		fputs("FuncObject(params=[", stdout);
 		for (size_t i = 0; i < expr->fo.params.len; ++i)
 		{
 			const strbuf cur_param_name = expr->fo.params.ptr[i];
@@ -191,7 +193,7 @@ void MML_print_expr(struct MML_config *config, const MML_expr *expr, uint32_t in
 					cur_param_name.s,
 					(i < expr->fo.params.len-1) ? ", " : "");
 		}
-		printf("], body=");
+		fputs("], body=", stdout);
 		MML_print_expr(config, expr->fo.body, indent);
 		MML_print_indent(indent);
 		putchar(')');
@@ -216,7 +218,7 @@ MML_value MML_print_exprh_tv_func(MML_state *state, MML_expr_vec *args)
 	fputc('\n', stdout);
 	state->config->last_print_was_newline = true;
 
-	return VAL_INVAL;
+	return NOTHING_VAL;
 }
 
 inline void MML_free_pp(void *p)

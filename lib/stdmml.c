@@ -12,14 +12,14 @@ static MML_value custom_dbg_type(MML_state *state, MML_expr_vec *args)
 	printf("%s", EXPR_TYPE_STRINGS[MML_eval_expr(state, args->ptr[0]).type]);
 	state->config->last_print_was_newline = false;
 
-	return VAL_INVAL;
+	return NOTHING_VAL;
 }
 
 static MML_value custom_dbg_ident(MML_state *state, MML_expr_vec *args)
 {
 	MML_print_exprh(MML_eval_get_variable(state, args->ptr[0]->s));
 
-	return VAL_INVAL;
+	return NOTHING_VAL;
 }
 
 static MML_value custom_config_set(MML_state *state, MML_expr_vec *args)
@@ -74,7 +74,7 @@ static MML_value custom_config_set(MML_state *state, MML_expr_vec *args)
 		return VAL_INVAL;
 	}
 
-	return VAL_INVAL;
+	return NOTHING_VAL;
 }
 
 static void register_functions(hashmap *maps[6])
