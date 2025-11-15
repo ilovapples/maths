@@ -70,6 +70,9 @@ MML_value MML_print_typedval(MML_state *state, const MML_value *val)
 		}
 		fputc(']', stdout);
 		break;
+	case FuncObject_type:
+		printf("FuncObject");
+		break;
 	default:
 		printf("(null)");
 		break;
@@ -186,7 +189,7 @@ void MML_print_expr(struct MML_config *config, const MML_expr *expr, uint32_t in
 			printf("'%.*s'%s",
 					(int)cur_param_name.len,
 					cur_param_name.s,
-					(i < expr->fo.params.len-1) ? "," : "");
+					(i < expr->fo.params.len-1) ? ", " : "");
 		}
 		printf("], body=");
 		MML_print_expr(config, expr->fo.body, indent);

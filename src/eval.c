@@ -150,7 +150,7 @@ static MML_value apply_func(MML_state *restrict state,
 		const MML_func_object fo = fo_expr->fo;
 
 		if (right_vec.v.n != fo.params.len) {
-			MML_log_err("call to function '%.*s' failed: expected %zu arguments; found %zu.",
+			MML_log_err("call to function '%.*s' failed: expected %zu argument(s); found %zu.",
 					(int)ident.len, ident.s, fo.params.len, right_vec.v.n);
 			return VAL_INVAL;
 		}
@@ -490,14 +490,14 @@ static bool MML_expr_depends_on(MML_state *state, const MML_expr *expr, const st
 
 MML_value MML_eval_expr_recurse(MML_state *restrict state, const MML_expr *expr)
 {
-	if (!state->is_init)
-	{
+	if (!state->is_init) {
 		MML_log_err("you must run `MML_init_state` before using any evaluator functions.\n");
 		return VAL_INVAL;
 	}
 
 	if (expr == NULL)
 		return VAL_INVAL;
+
 	switch (expr->type) {
 	case Invalid_type:
 		return VAL_INVAL;
@@ -524,6 +524,7 @@ MML_value MML_eval_expr_recurse(MML_state *restrict state, const MML_expr *expr)
 				(int)expr->s.len, expr->s.s);
 		return VAL_INVAL;
 	}
+	case FuncObject_type: return (MML_value) { FuncObject_type, .w = expr->w };
 	default:
 		break;
 	}
@@ -559,11 +560,13 @@ MML_value MML_eval_expr_recurse(MML_state *restrict state, const MML_expr *expr)
 			}
 			fo.body = right;
 
-			MML_expr *const new_expr = arena_alloc_T(MML_global_arena, 1, MML_expr);
-			new_expr->type = FuncObject_type;
-			new_expr->fo = fo;
+			if (is_legal) {
+				MML_expr *const new_expr = arena_alloc_T(MML_global_arena, 1, MML_expr);
+				new_expr->type = FuncObject_type;
+				new_expr->fo = fo;
 
-			if (is_legal) MML_eval_set_variable(state, left->o.left->s, new_expr);
+				if (is_legal) MML_eval_set_variable(state, left->o.left->s, new_expr);
+			}
 
 			return VAL_INVAL; // should return 'nothing' when that's added
 		}
