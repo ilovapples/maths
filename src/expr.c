@@ -11,10 +11,7 @@
 #include "mml/expr.h"
 #include "mml/config.h"
 
-void MML_print_indent(uint32_t indent)
-{
-	printf("%*s", indent, "");
-}
+#define PRINT_INDENT(_i) printf("%*s", (_i), "")
 
 MML_value MML_print_typedval(MML_state *state, const MML_value *val)
 {
@@ -116,7 +113,7 @@ MML_value MML_println_typedval_multiargs(MML_state *state, MML_expr_vec *args)
 
 void MML_print_expr(struct MML_config *config, const MML_expr *expr, uint32_t indent)
 {
-	MML_print_indent(indent);
+	PRINT_INDENT(indent);
 	if (expr == nullptr)
 	{
 		printf("(null)\n");
@@ -135,7 +132,7 @@ void MML_print_expr(struct MML_config *config, const MML_expr *expr, uint32_t in
 			putchar(',');
 		}
 		putchar('\n');
-		MML_print_indent(indent);
+		PRINT_INDENT(indent);
 		putchar(')');
 		break;
 	case Nothing_type: fputs("Nothing", stdout); break;
@@ -180,7 +177,7 @@ void MML_print_expr(struct MML_config *config, const MML_expr *expr, uint32_t in
 			MML_print_expr(config, expr->v.ptr[i], indent+4);
 			fputs(",\n", stdout);
 		}
-		MML_print_indent(indent);
+		PRINT_INDENT(indent);
 		putchar(')');
 		break;
 	case FuncObject_type:
@@ -195,7 +192,7 @@ void MML_print_expr(struct MML_config *config, const MML_expr *expr, uint32_t in
 		}
 		fputs("], body=", stdout);
 		MML_print_expr(config, expr->fo.body, indent);
-		MML_print_indent(indent);
+		PRINT_INDENT(indent);
 		putchar(')');
 		break;
 	default:

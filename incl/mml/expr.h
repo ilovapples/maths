@@ -111,7 +111,6 @@ constexpr MML_expr NOTHING_EXPR = { Nothing_type, .w={} };
  || (v).type == Boolean_type)
 
 typedef struct MML_state MML_state;
-void MML_print_indent(uint32_t indent);
 MML_value MML_print_typedval(MML_state *restrict state, const MML_value *val);
 MML_value MML_println_typedval(MML_state *restrict state, const MML_value *val);
 MML_value MML_print_typedval_multiargs(MML_state *restrict state, MML_expr_vec *args);
