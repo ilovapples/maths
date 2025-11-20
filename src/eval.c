@@ -108,24 +108,22 @@ void MML_cleanup_state(MML_state *restrict state)
 	free(state);
 }
 
-int32_t MML_eval_set_variable(MML_state *restrict state,
-		strbuf name, MML_expr *expr)
+int32_t MML_eval_set_variable(MML_state *restrict state, strbuf name, MML_expr *expr)
 {
 	if (state->variables == nullptr)
 		state->variables = hashmap_create();
-	
+
 	return hashmap_set(state->variables,
 			name.s, name.len, (uintptr_t)expr);
 }
-MML_expr *MML_eval_get_variable(MML_state *restrict state,
-		strbuf name)
+MML_expr *MML_eval_get_variable(MML_state *restrict state, strbuf name)
 {
 	MML_expr *out;
 	if (state->locals != nullptr &&
 			hashmap_get(state->locals, name.s, name.len, (uintptr_t *)&out))
 		return out;
 
-	if (state->variables != nullptr && 
+	if (state->variables != nullptr &&
 			hashmap_get(state->variables, name.s, name.len, (uintptr_t *)&out))
 		return out;
 
@@ -134,8 +132,7 @@ MML_expr *MML_eval_get_variable(MML_state *restrict state,
 
 #define EPSILON 1e-14
 
-static MML_value apply_func(MML_state *restrict state,
-		strbuf ident, MML_value right_vec)
+static MML_value apply_func(MML_state *restrict state, strbuf ident, MML_value right_vec)
 {
 	MML_expr *fo_expr;
 	if (state->variables != nullptr &&
@@ -445,22 +442,21 @@ MML_value MML_apply_binary_op(MML_state *restrict state, MML_value a, MML_value 
 	return VAL_INVAL;
 }
 
-bool contains_ident_check(const MML_expr *e, void *context)
+static bool expr_contains_ident(const MML_expr *e, strbuf ident)
 {
-	const strbuf *const ident = context;
 	return e->type == Identifier_type
-		&& e->s.len == ident->len
-		&& memcmp(ident->s, e->s.s, ident->len) == 0;
+		&& e->s.len == ident.len
+		&& memcmp(ident.s, e->s.s, ident.len) == 0;
 }
 
-static bool MML_expr_depends_on(MML_state *state, const MML_expr *expr, const strbuf *target_name)
+static bool MML_expr_depends_on(MML_state *state, const MML_expr *expr, strbuf target_name)
 {
 	if (expr == NULL)
 		return false;
-	
-	if (contains_ident_check(expr, (void *)target_name))
+
+	if (expr_contains_ident(expr, target_name))
 		return true;
-	
+
 	if (expr->type == Identifier_type)
 	{
 		MML_expr *dep = MML_eval_get_variable(state, expr->s);
@@ -473,7 +469,7 @@ static bool MML_expr_depends_on(MML_state *state, const MML_expr *expr, const st
 	{
 		if (MML_expr_depends_on(state, expr->o.left, target_name))
 			return true;
-		
+
 		if (MML_expr_depends_on(state, expr->o.right, target_name))
 			return true;
 	}
@@ -516,7 +512,7 @@ MML_value MML_eval_expr_recurse(MML_state *restrict state, const MML_expr *expr)
 			return state->last_val;
 		if (hashmap_get(eval_builtin_maps[0], expr->s.s, expr->s.len, (uintptr_t *)&val))
 			return *val;
-		
+
 		MML_expr *e = MML_eval_get_variable(state, expr->s);
 		if (e != NULL)
 			return MML_eval_expr_recurse(state, e);
@@ -535,7 +531,7 @@ MML_value MML_eval_expr_recurse(MML_state *restrict state, const MML_expr *expr)
 
 	if (expr->o.op == MML_OP_ASSERT_EQUAL && left != NULL) {
 		if (left->type == Identifier_type) {
-			if (MML_expr_depends_on(state, right, &left->s)) {
+			if (MML_expr_depends_on(state, right, left->s)) {
 				MML_log_err("circular dependency found in definition of '%.*s'\n",
 					(int)left->s.len, left->s.s);
 

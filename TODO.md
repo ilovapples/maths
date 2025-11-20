@@ -14,7 +14,7 @@
 - [x] fix random memory leaks (probably caused by evaluator but I can't figure out the root cause)
 - [x] fix the identifier 'a' having inexplicable bugs (--set_var doesn't work with it, it never flags an 'undefined variable' error even when it should, etc.)
 - [x] vector literals have regressed; each element is (null) or the first thing that was evaluated (no idea why) (forgot to add a memcpy when transitioning to arena but we're good now)
-- [ ] 'Nothing' type to return from stuff like `println` (basically `void`)
+- [x] 'Nothing' type to return from stuff like `println` (basically `void`)
 - [x] improve `MML_print_expr` to print the AST in a more similar format to the syntax used with `tests/ast_test.h`
 - [ ] add Type type so I can add a `cast{type, val}` function
 - [x] fix prompt so it reads data in 1 byte minimum chunks (now it's 8 bytes for one character read,
