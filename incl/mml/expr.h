@@ -18,7 +18,7 @@ typedef struct MML_Operation {
 	MML_expr *left;
 	MML_expr *right;
 	MML_token_type op;
-} MML_Operation;
+} MML_operation;
 
 typedef enum MML_ExprType {
 	OutputCode_type,
@@ -77,7 +77,7 @@ typedef struct MML_value {
 typedef struct MML_expr {
 	MML_expr_type type;
 	union {
-		MML_Operation o;
+		MML_operation o;
 
 		int64_t i;
 		double n;
